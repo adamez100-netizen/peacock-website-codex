@@ -1164,7 +1164,7 @@ const BedroomInspirationPage = ({ inspirations, onBack, nav }) => {
 };
 
 // ═══════ COLOUR CATEGORY PAGE ═══════
-const ColourCategoryPage = ({ categoryName, categoryData, allColours, onBack, onNavCategory, onOpenColour }) => {
+const ColourCategoryPage = ({ categoryName, categoryData, allColours, onBack, onNavCategory, onOpenColour, homeHref, colourHrefFn, catHrefFn }) => {
   const categoryColors = allColours.filter(c => categoryData.colors.includes(c.name));
   const otherCats = Object.entries(COLOUR_CATEGORIES).filter(([k]) => k !== categoryName);
 
@@ -1173,7 +1173,7 @@ const ColourCategoryPage = ({ categoryName, categoryData, allColours, onBack, on
       {/* Breadcrumb */}
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "16px 24px" }}>
         <div style={{ display: "flex", gap: 8, fontSize: 13, color: "#999" }}>
-          <span onClick={onBack} style={{ color: B.coral, cursor: "pointer", fontWeight: 500 }}>Home</span>
+          <a href={homeHref} onClick={e => { e.preventDefault(); onBack(); }} style={{ textDecoration: "none", color: B.coral, cursor: "pointer", fontWeight: 500 }}>Home</a>
           <span>/</span><span>Colours</span><span>/</span>
           <span style={{ color: "#333" }}>{categoryName}</span>
         </div>
@@ -1196,12 +1196,12 @@ const ColourCategoryPage = ({ categoryName, categoryData, allColours, onBack, on
       <section style={{ background: "#fff", borderBottom: "1px solid #f0f0f0", padding: "18px 0" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
           {categoryColors.map((c, i) => (
-            <div key={i} onClick={() => onOpenColour && onOpenColour(c)}
-              style={{ display: "flex", alignItems: "center", gap: 7, background: "#f8f8f6", borderRadius: 24, padding: "5px 14px 5px 7px", border: "1px solid #ebebeb", cursor: "pointer", transition: "border-color .2s" }}
+            <a key={i} href={colourHrefFn ? colourHrefFn(c) : undefined} onClick={e => { e.preventDefault(); onOpenColour && onOpenColour(c); }}
+              style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: 7, background: "#f8f8f6", borderRadius: 24, padding: "5px 14px 5px 7px", border: "1px solid #ebebeb", cursor: "pointer", transition: "border-color .2s" }}
               onMouseEnter={e => e.currentTarget.style.borderColor = "#ccc"} onMouseLeave={e => e.currentTarget.style.borderColor = "#ebebeb"}>
               <div style={{ width: 18, height: 18, borderRadius: "50%", background: c.color, border: "1px solid rgba(0,0,0,.1)", flexShrink: 0 }} />
               <span style={{ fontSize: 12, fontWeight: 500, color: "#555" }}>{c.name}</span>
-            </div>
+            </a>
           ))}
         </div>
       </section>
@@ -1214,8 +1214,8 @@ const ColourCategoryPage = ({ categoryName, categoryData, allColours, onBack, on
         </div>
         <div className="g4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
           {categoryColors.map((c, i) => (
-            <div key={i} onClick={() => onOpenColour && onOpenColour(c)}
-              style={{ background: "#fff", borderRadius: 14, border: "1px solid #eee", overflow: "hidden", cursor: "pointer", transition: "transform .3s, box-shadow .3s" }}
+            <a key={i} href={colourHrefFn ? colourHrefFn(c) : undefined} onClick={e => { e.preventDefault(); onOpenColour && onOpenColour(c); }}
+              style={{ textDecoration: "none", color: "inherit", display: "block", background: "#fff", borderRadius: 14, border: "1px solid #eee", overflow: "hidden", cursor: "pointer", transition: "transform .3s, box-shadow .3s" }}
               onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-5px)"; e.currentTarget.style.boxShadow = "0 16px 40px rgba(0,0,0,.1)"; }}
               onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
               {/* Swatch area */}
@@ -1232,7 +1232,7 @@ const ColourCategoryPage = ({ categoryName, categoryData, allColours, onBack, on
                   <button style={{ fontSize: 11, fontWeight: 600, color: B.coral, background: `${B.coral}12`, border: "none", padding: "4px 10px", borderRadius: 12, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>Sample</button>
                 </div>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </section>
@@ -1255,14 +1255,14 @@ const ColourCategoryPage = ({ categoryName, categoryData, allColours, onBack, on
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 600, marginBottom: 24 }}>Explore more colour collections</h2>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             {otherCats.map(([name, data]) => (
-              <div key={name} onClick={() => onNavCategory(name)}
-                style={{ display: "flex", alignItems: "center", gap: 10, background: "#f8f8f6", border: "1px solid #eee", borderRadius: 12, padding: "11px 20px", cursor: "pointer", transition: "all .2s" }}
+              <a key={name} href={catHrefFn ? catHrefFn(name, data) : undefined} onClick={e => { e.preventDefault(); onNavCategory(name); }}
+                style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: 10, background: "#f8f8f6", border: "1px solid #eee", borderRadius: 12, padding: "11px 20px", cursor: "pointer", transition: "all .2s" }}
                 onMouseEnter={e => { e.currentTarget.style.background = "#f0ede8"; e.currentTarget.style.borderColor = "#ddd"; e.currentTarget.style.transform = "translateY(-2px)"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = "#f8f8f6"; e.currentTarget.style.borderColor = "#eee"; e.currentTarget.style.transform = ""; }}>
                 <div style={{ width: 24, height: 24, borderRadius: "50%", background: CAT_SWATCH_COLORS[name] || "#ddd", border: "2px solid rgba(0,0,0,.08)", flexShrink: 0 }} />
                 <span style={{ fontSize: 14, fontWeight: 600, color: "#333" }}>{name}</span>
                 <span style={{ fontSize: 12, color: "#aaa" }}>({allColours.filter(c => data.colors.includes(c.name)).length})</span>
-              </div>
+              </a>
             ))}
           </div>
           <p style={{ marginTop: 16, fontSize: 13, color: "#bbb" }}>More colour collections coming soon</p>
@@ -1273,7 +1273,7 @@ const ColourCategoryPage = ({ categoryName, categoryData, allColours, onBack, on
 };
 
 // ═══════ STYLE CATEGORY PAGE ═══════
-const StyleCategoryPage = ({ styleName, styleData, allColours, onBack, onNavStyle, onOpenColour }) => {
+const StyleCategoryPage = ({ styleName, styleData, allColours, onBack, onNavStyle, onOpenColour, homeHref, colourHrefFn, styleHrefFn }) => {
   const styleColors = allColours.filter(c => styleData.colors.includes(c.name));
   const otherStyles = Object.entries(STYLE_CATEGORIES).filter(([k]) => k !== styleName);
 
@@ -1282,7 +1282,7 @@ const StyleCategoryPage = ({ styleName, styleData, allColours, onBack, onNavStyl
       {/* Breadcrumb */}
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "16px 24px" }}>
         <div style={{ display: "flex", gap: 8, fontSize: 13, color: "#999" }}>
-          <span onClick={onBack} style={{ color: B.coral, cursor: "pointer", fontWeight: 500 }}>Home</span>
+          <a href={homeHref} onClick={e => { e.preventDefault(); onBack(); }} style={{ textDecoration: "none", color: B.coral, cursor: "pointer", fontWeight: 500 }}>Home</a>
           <span>/</span><span>Colours</span><span>/</span><span>By Style</span><span>/</span>
           <span style={{ color: "#333" }}>{styleName}</span>
         </div>
@@ -1311,12 +1311,12 @@ const StyleCategoryPage = ({ styleName, styleData, allColours, onBack, onNavStyl
       <section style={{ background: "#fff", borderBottom: "1px solid #f0f0f0", padding: "18px 0" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
           {styleColors.map((c, i) => (
-            <div key={i} onClick={() => onOpenColour && onOpenColour(c)}
-              style={{ display: "flex", alignItems: "center", gap: 7, background: "#f8f8f6", borderRadius: 24, padding: "5px 14px 5px 7px", border: "1px solid #ebebeb", cursor: "pointer", transition: "border-color .2s" }}
+            <a key={i} href={colourHrefFn ? colourHrefFn(c) : undefined} onClick={e => { e.preventDefault(); onOpenColour && onOpenColour(c); }}
+              style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center", gap: 7, background: "#f8f8f6", borderRadius: 24, padding: "5px 14px 5px 7px", border: "1px solid #ebebeb", cursor: "pointer", transition: "border-color .2s" }}
               onMouseEnter={e => e.currentTarget.style.borderColor = "#ccc"} onMouseLeave={e => e.currentTarget.style.borderColor = "#ebebeb"}>
               <div style={{ width: 18, height: 18, borderRadius: "50%", background: c.color, border: "1px solid rgba(0,0,0,.1)", flexShrink: 0 }} />
               <span style={{ fontSize: 12, fontWeight: 500, color: "#555" }}>{c.name}</span>
-            </div>
+            </a>
           ))}
         </div>
       </section>
@@ -1329,8 +1329,8 @@ const StyleCategoryPage = ({ styleName, styleData, allColours, onBack, onNavStyl
         </div>
         <div className="g4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
           {styleColors.map((c, i) => (
-            <div key={i} onClick={() => onOpenColour && onOpenColour(c)}
-              style={{ background: "#fff", borderRadius: 14, border: "1px solid #eee", overflow: "hidden", cursor: "pointer", transition: "transform .3s, box-shadow .3s" }}
+            <a key={i} href={colourHrefFn ? colourHrefFn(c) : undefined} onClick={e => { e.preventDefault(); onOpenColour && onOpenColour(c); }}
+              style={{ textDecoration: "none", color: "inherit", display: "block", background: "#fff", borderRadius: 14, border: "1px solid #eee", overflow: "hidden", cursor: "pointer", transition: "transform .3s, box-shadow .3s" }}
               onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-5px)"; e.currentTarget.style.boxShadow = "0 16px 40px rgba(0,0,0,.1)"; }}
               onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
               <div style={{ background: `${c.color}28`, padding: "20px 16px", height: 160, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
@@ -1345,7 +1345,7 @@ const StyleCategoryPage = ({ styleName, styleData, allColours, onBack, onNavStyl
                   <button style={{ fontSize: 11, fontWeight: 600, color: B.coral, background: `${B.coral}12`, border: "none", padding: "4px 10px", borderRadius: 12, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>Sample</button>
                 </div>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </section>
@@ -1371,8 +1371,8 @@ const StyleCategoryPage = ({ styleName, styleData, allColours, onBack, onNavStyl
             {otherStyles.map(([name, data]) => {
               const preview = allColours.filter(c => data.colors.includes(c.name)).slice(0, 5);
               return (
-                <div key={name} onClick={() => onNavStyle(name)}
-                  style={{ borderRadius: 14, overflow: "hidden", cursor: "pointer", border: "1px solid #eee", transition: "transform .3s, box-shadow .3s" }}
+                <a key={name} href={styleHrefFn ? styleHrefFn(name, data) : undefined} onClick={e => { e.preventDefault(); onNavStyle(name); }}
+                  style={{ textDecoration: "none", color: "inherit", display: "block", borderRadius: 14, overflow: "hidden", cursor: "pointer", border: "1px solid #eee", transition: "transform .3s, box-shadow .3s" }}
                   onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 12px 32px rgba(0,0,0,.1)"; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
                   {/* Mini gradient hero */}
@@ -1385,7 +1385,7 @@ const StyleCategoryPage = ({ styleName, styleData, allColours, onBack, onNavStyl
                     <h4 style={{ fontSize: 14, fontWeight: 700, marginBottom: 3 }}>{name}</h4>
                     <p style={{ fontSize: 12, color: "#999" }}>{allColours.filter(c => data.colors.includes(c.name)).length} shades</p>
                   </div>
-                </div>
+                </a>
               );
             })}
           </div>
@@ -1398,7 +1398,7 @@ const StyleCategoryPage = ({ styleName, styleData, allColours, onBack, onNavStyl
 // ═══════ COLOUR DETAIL PAGE ═══════
 const PAINT_RECOMMENDATIONS = PRODUCTS; // all 12 products
 
-const ColourDetailPage = ({ colour, categoryName, onBack, onBackHome, onAddToCart }) => {
+const ColourDetailPage = ({ colour, categoryName, onBack, onBackHome, onAddToCart, homeHref, backHref }) => {
   const [imgIdx, setImgIdx] = useState(0);
   const [buyOpen, setBuyOpen] = useState(false);
   const [selectedProd, setSelectedProd] = useState(null);
@@ -1423,9 +1423,9 @@ const ColourDetailPage = ({ colour, categoryName, onBack, onBackHome, onAddToCar
       {/* Breadcrumb bar */}
       <div style={{ padding: "13px 28px", borderBottom: "1px solid #eee", background: "#fff" }}>
         <div style={{ display: "flex", gap: 10, fontSize: 12, color: "#999", alignItems: "center" }}>
-          <span onClick={onBackHome} style={{ color: "#333", cursor: "pointer", fontWeight: 700, textTransform: "uppercase", letterSpacing: .5 }}>Home</span>
+          <a href={homeHref} onClick={e => { e.preventDefault(); onBackHome(); }} style={{ textDecoration: "none", color: "#333", cursor: "pointer", fontWeight: 700, textTransform: "uppercase", letterSpacing: .5 }}>Home</a>
           <span style={{ fontSize: 16, color: "#ccc", lineHeight: 1 }}>›</span>
-          <span onClick={onBack} style={{ color: "#333", cursor: "pointer", fontWeight: 700, textTransform: "uppercase", letterSpacing: .5 }}>{categoryName}</span>
+          <a href={backHref} onClick={e => { e.preventDefault(); onBack(); }} style={{ textDecoration: "none", color: "#333", cursor: "pointer", fontWeight: 700, textTransform: "uppercase", letterSpacing: .5 }}>{categoryName}</a>
           <span style={{ fontSize: 16, color: "#ccc", lineHeight: 1 }}>›</span>
           <span style={{ color: "#555", textTransform: "uppercase", fontWeight: 700, letterSpacing: .5 }}>{colour.name}®</span>
         </div>
@@ -1674,13 +1674,35 @@ export default function PeacockPaintsWebsite() {
   const [colourCarouselIdx, setColourCarouselIdx] = useState(0);
   const CARDS_VISIBLE = 5;
   const findColourCat = (name) => { for (const [k, v] of Object.entries(COLOUR_CATEGORIES)) { if (v.colors.includes(name)) return k; } return null; };
-  const handleColourClick = (c) => { const cat = findColourCat(c.name); setSelectedColour(c); setSelectedColourCategory(cat); nav("colour-detail"); };
+  const handleColourClick = (c) => { const cat = findColourCat(c.name); setSelectedColour(c); setSelectedColourCategory(cat); setPg("colour-detail"); setActiveMenu(null); setMobMenu(false); setMobSub(null); window.scrollTo({ top: 0, behavior: "smooth" }); window.history.replaceState(null, "", `#/colour/${encodeURIComponent(c.name)}`); };
   const mRef = useRef(null);
   const prodSectionRef = useRef(null);
   const scrollToProdPending = useRef(false);
 
   useEffect(() => { const h = () => setScrolled(window.scrollY > 50); window.addEventListener("scroll", h); return () => window.removeEventListener("scroll", h); }, []);
   useEffect(() => { const t = setInterval(() => setHeroSlide(s => (s + 1) % 2), 6000); return () => clearInterval(t); }, []);
+
+  // ─── Hash-based routing: restore page from URL on mount / new tab ───
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash.replace(/^#\/?/, "");
+      if (!hash || hash === "home") { setPg("home"); return; }
+      if (hash.startsWith("product/")) {
+        const id = hash.replace("product/", "");
+        const p = PRODUCTS.find(pr => pr.id === id);
+        if (p) { setSelectedProduct(p); setPg("product"); return; }
+      }
+      if (hash.startsWith("colour/")) {
+        const name = decodeURIComponent(hash.replace("colour/", ""));
+        const c = trendingColours.find(tc => tc.name === name);
+        if (c) { const cat = findColourCat(c.name); setSelectedColour(c); setSelectedColourCategory(cat); setPg("colour-detail"); return; }
+      }
+      setPg(hash);
+    };
+    handleHash();
+    window.addEventListener("hashchange", handleHash);
+    return () => window.removeEventListener("hashchange", handleHash);
+  }, []);
   useEffect(() => {
     if (scrollToProdPending.current && prodSectionRef.current) {
       scrollToProdPending.current = false;
@@ -1693,8 +1715,14 @@ export default function PeacockPaintsWebsite() {
 
   const mE = i => { clearTimeout(mRef.current); setActiveMenu(i); };
   const mL = () => { mRef.current = setTimeout(() => setActiveMenu(null), 200); };
-  const nav = p => { setPg(p); setSelectedProduct(null); setActiveMenu(null); setMobMenu(false); setMobSub(null); window.scrollTo({ top: 0, behavior: "smooth" }); };
-  const openProduct = (p) => { setSelectedProduct(p); setPg("product"); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const nav = p => { setPg(p); setSelectedProduct(null); setActiveMenu(null); setMobMenu(false); setMobSub(null); window.scrollTo({ top: 0, behavior: "smooth" }); window.history.replaceState(null, "", `#/${p}`); };
+  const openProduct = (p) => { setSelectedProduct(p); setPg("product"); window.scrollTo({ top: 0, behavior: "smooth" }); window.history.replaceState(null, "", `#/product/${p.id}`); };
+
+  // ─── Hash URL helpers ───
+  const makeHref = (slug) => `#/${slug}`;
+  const productHref = (p) => `#/product/${p.id}`;
+  const colourHref = (c) => `#/colour/${encodeURIComponent(c.name)}`;
+  const aReset = { textDecoration: "none", color: "inherit" };
   const addToCart = (item) => {
     setCart(prev => {
       const existing = prev.find(c => c.product.id === item.product.id && c.size === item.size);
@@ -1750,10 +1778,10 @@ export default function PeacockPaintsWebsite() {
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, textAlign: "center", marginBottom: 36 }}>Explore More</h2>
           <div className="ge4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
             {Object.entries(storyPages).filter(([k]) => k !== key).map(([k, s]) => (
-              <div key={k} onClick={() => nav(k)} style={{ background: s.hg, borderRadius: 12, padding: 28, color: "#fff", cursor: "pointer", transition: "transform .3s", minHeight: 140, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}
+              <a key={k} href={makeHref(k)} onClick={e => { e.preventDefault(); nav(k); }} style={{ ...aReset, background: s.hg, borderRadius: 12, padding: 28, color: "#fff", cursor: "pointer", transition: "transform .3s", minHeight: 140, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}
                 onMouseEnter={e => e.currentTarget.style.transform = "translateY(-4px)"} onMouseLeave={e => e.currentTarget.style.transform = ""}>
                 <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>{s.title}</h3><p style={{ fontSize: 12, opacity: .85 }}>{s.subtitle}</p>
-              </div>))}
+              </a>))}
           </div>
         </div>
       </section>
@@ -1807,7 +1835,7 @@ export default function PeacockPaintsWebsite() {
       <header style={{ position: "sticky", top: 0, zIndex: 200, background: "#fff", boxShadow: scrolled ? "0 2px 20px rgba(0,0,0,.08)" : "none", transition: "box-shadow .3s" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 72 }}>
           <button className="mob" onClick={() => setMobMenu(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }}><MenuIcon /></button>
-          <div style={{ cursor: "pointer", flexShrink: 0 }} onClick={() => nav("home")}><img src={LOGO_HEADER} alt="Peacock Paints" style={{ height: 52 }} /></div>
+          <a href={makeHref("home")} onClick={e => { e.preventDefault(); nav("home"); }} style={{ ...aReset, cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center" }}><img src={LOGO_HEADER} alt="Peacock Paints" style={{ height: 52 }} /></a>
           <nav className="dsk" style={{ display: "flex", gap: 28, alignItems: "center" }} onMouseLeave={mL}>
             {navData.map((item, i) => (<div key={i} onMouseEnter={() => mE(i)}><span className={`nl ${activeMenu === i ? "a" : ""}`} style={{ display: "flex", alignItems: "center", gap: 4 }}>{item.label} <ChevDown /></span></div>))}
           </nav>
@@ -1824,19 +1852,19 @@ export default function PeacockPaintsWebsite() {
             <div style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 24px", display: "grid", gridTemplateColumns: navData[activeMenu].columns.map(c => c.type === "promo" ? "1.2fr" : "1fr").join(" "), gap: 32 }}>
               {navData[activeMenu].columns.map((col, ci) => (<div key={ci}>
                 {col.type === "promo" ? (<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  {col.items.map((pr, pi) => (<div key={pi} className="pc" onClick={() => pr.page && nav(pr.page)} style={{ background: pr.bg, color: pr.dark ? "#fff" : "#1a1a1a" }}>
+                  {col.items.map((pr, pi) => (<a key={pi} href={pr.page ? makeHref(pr.page) : undefined} onClick={e => { e.preventDefault(); if (pr.page) nav(pr.page); }} className="pc" style={{ ...aReset, display: "block", background: pr.bg, color: pr.dark ? "#fff" : "#1a1a1a" }}>
                     <h4 style={{ fontSize: 13, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>{pr.title}</h4>
                     <p style={{ fontSize: 12, lineHeight: 1.5, marginBottom: 10, opacity: .85 }}>{pr.desc}</p>
                     <span style={{ fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>{pr.cta} <Arr /></span>
-                  </div>))}</div>) : col.title === "By Colours" ? (<div>
+                  </a>))}</div>) : col.title === "By Colours" ? (<div>
                   <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5, color: B.coral, marginBottom: 14 }}>{col.title}</h3>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
                     {col.links.map((l, li) => {
                       const catData = COLOUR_CATEGORIES[l];
                       const isLinked = !!catData;
                       return (
-                        <div key={li} onClick={() => isLinked && nav(catData.slug)}
-                          style={{ display: "flex", alignItems: "center", gap: 9, padding: "7px 8px", borderRadius: 8, cursor: isLinked ? "pointer" : "default", transition: "background .18s" }}
+                        <a key={li} href={isLinked ? makeHref(catData.slug) : undefined} onClick={e => { e.preventDefault(); if (isLinked) nav(catData.slug); }}
+                          style={{ ...aReset, display: "flex", alignItems: "center", gap: 9, padding: "7px 8px", borderRadius: 8, cursor: isLinked ? "pointer" : "default", transition: "background .18s" }}
                           onMouseEnter={e => { if (isLinked) e.currentTarget.style.background = "#f3f1ee"; }}
                           onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
                           <div style={{ width: 28, height: 28, borderRadius: "50%", background: CAT_SWATCH_COLORS[l] || "#ddd", border: "2px solid rgba(0,0,0,.09)", flexShrink: 0, boxShadow: "inset 0 1px 2px rgba(255,255,255,.5)" }} />
@@ -1844,7 +1872,7 @@ export default function PeacockPaintsWebsite() {
                             <span style={{ fontSize: 13, color: isLinked ? "#2a2a2a" : "#aaa", fontWeight: isLinked ? 500 : 400, display: "block", lineHeight: 1.2 }}>{l}</span>
                             {isLinked && <span style={{ fontSize: 10, color: "#aaa" }}>{COLOUR_CATEGORIES[l].colors.length} shades</span>}
                           </div>
-                        </div>
+                        </a>
                       );
                     })}
                   </div>
@@ -1857,11 +1885,13 @@ export default function PeacockPaintsWebsite() {
                     const isPageLink = !!pageMap[l];
                     const linkedProduct = PRODUCTS.find(p => p.name === l);
                     const isClickable = isFinishLink || isPageLink || !!linkedProduct;
-                    return (<span key={li} className="ml" onClick={() => {
+                    const linkHref = isPageLink ? makeHref(pageMap[l]) : linkedProduct ? productHref(linkedProduct) : undefined;
+                    return (<a key={li} href={linkHref} className="ml" onClick={e => {
+                      e.preventDefault();
                       if (isFinishLink) { setFinishFilter(l); setProdTab("all"); setPg("home"); setSelectedProduct(null); setActiveMenu(null); setMobMenu(false); setMobSub(null); scrollToProdPending.current = true; }
                       else if (isPageLink) { nav(pageMap[l]); }
                       else if (linkedProduct) { openProduct(linkedProduct); }
-                    }} style={isClickable ? { cursor: "pointer", color: isFinishLink ? B.black : undefined } : {}}>{l}</span>);
+                    }} style={{ ...aReset, cursor: isClickable ? "pointer" : "default", color: isFinishLink ? B.black : undefined }}>{l}</a>);
                   })}
                   {col.footer && <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid #e8e8e8" }}>{col.footer.map((f, fi) => (<span key={fi} className="ml" style={{ fontWeight: 600, color: B.coral }}>{f.label}</span>))}</div>}
                 </div>)}
@@ -1935,13 +1965,15 @@ export default function PeacockPaintsWebsite() {
                 const isPageLink = !!pageMap[l];
                 const linkedProduct = PRODUCTS.find(p => p.name === l);
                 const isClickable = isFinishLink || isPageLink || !!linkedProduct;
-                return (<div key={li} onClick={() => {
+                const mobLinkHref = isPageLink ? makeHref(pageMap[l]) : linkedProduct ? productHref(linkedProduct) : undefined;
+                return (<a key={li} href={mobLinkHref} onClick={e => {
+                  e.preventDefault();
                   if (isFinishLink) { setFinishFilter(l); setProdTab("all"); setPg("home"); setSelectedProduct(null); setActiveMenu(null); setMobMenu(false); setMobSub(null); scrollToProdPending.current = true; }
                   else if (isPageLink) { nav(pageMap[l]); }
                   else if (linkedProduct) { openProduct(linkedProduct); }
-                }} style={{ padding: "8px 0", fontSize: 14, color: isClickable ? B.coral : "#444", cursor: isClickable ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                }} style={{ ...aReset, padding: "8px 0", fontSize: 14, color: isClickable ? B.coral : "#444", cursor: isClickable ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   {l}{isClickable && !isFinishLink && <ChevRight />}
-                </div>);
+                </a>);
               })}
             </div>))}
           </div>)}
@@ -1952,7 +1984,7 @@ export default function PeacockPaintsWebsite() {
       {pg === "product" && selectedProduct ? (
         <ProductDetailPage product={selectedProduct} onBack={() => nav("home")} onAddToCart={addToCart} onOpenProduct={openProduct} cart={cart} />
       ) : pg === "bedroom-inspiration" ? (
-        <><div style={{ maxWidth: 1280, margin: "0 auto", padding: "16px 24px" }}><span onClick={() => nav("home")} style={{ fontSize: 13, color: B.coral, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}><ArrL /> Home</span></div>
+        <><div style={{ maxWidth: 1280, margin: "0 auto", padding: "16px 24px" }}><a href={makeHref("home")} onClick={e => { e.preventDefault(); nav("home"); }} style={{ ...aReset, fontSize: 13, color: B.coral, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}><ArrL /> Home</a></div>
         <BedroomInspirationPage inspirations={BEDROOM_INSPIRATIONS} onBack={() => nav("home")} nav={nav} /></>
       ) : pg === "colour-detail" && selectedColour ? (
         <ColourDetailPage
@@ -1967,6 +1999,8 @@ export default function PeacockPaintsWebsite() {
           }}
           onBackHome={() => nav("home")}
           onAddToCart={addToCart}
+          homeHref={makeHref("home")}
+          backHref={(() => { const d = COLOUR_CATEGORIES[selectedColourCategory]; if (d) return makeHref(d.slug); const s = STYLE_CATEGORIES[selectedColourStyle]; if (s) return makeHref(s.slug); return makeHref("home"); })()}
         />
       ) : currentColourCatName ? (
         <ColourCategoryPage
@@ -1976,6 +2010,9 @@ export default function PeacockPaintsWebsite() {
           onBack={() => nav("home")}
           onNavCategory={(name) => { const d = COLOUR_CATEGORIES[name]; if (d) nav(d.slug); }}
           onOpenColour={(c) => { setSelectedColour(c); setSelectedColourCategory(currentColourCatName); nav("colour-detail"); }}
+          homeHref={makeHref("home")}
+          colourHrefFn={colourHref}
+          catHrefFn={(name, data) => makeHref(data.slug)}
         />
       ) : currentStyleName ? (
         <StyleCategoryPage
@@ -1985,9 +2022,12 @@ export default function PeacockPaintsWebsite() {
           onBack={() => nav("home")}
           onNavStyle={(name) => { const d = STYLE_CATEGORIES[name]; if (d) nav(d.slug); }}
           onOpenColour={(c) => { setSelectedColour(c); setSelectedColourStyle(currentStyleName); setSelectedColourCategory(null); nav("colour-detail"); }}
+          homeHref={makeHref("home")}
+          colourHrefFn={colourHref}
+          styleHrefFn={(name, data) => makeHref(data.slug)}
         />
       ) : pg !== "home" && storyPages[pg] ? (
-        <><div style={{ maxWidth: 1280, margin: "0 auto", padding: "16px 24px" }}><span onClick={() => nav("home")} style={{ fontSize: 13, color: B.coral, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}><ArrL /> Home</span></div>{renderStory(pg)}</>
+        <><div style={{ maxWidth: 1280, margin: "0 auto", padding: "16px 24px" }}><a href={makeHref("home")} onClick={e => { e.preventDefault(); nav("home"); }} style={{ ...aReset, fontSize: 13, color: B.coral, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}><ArrL /> Home</a></div>{renderStory(pg)}</>
       ) : (<>
         {/* Hero */}
         <section className="hero-s" style={{ position: "relative", height: 520, overflow: "hidden" }}>
@@ -2037,9 +2077,9 @@ export default function PeacockPaintsWebsite() {
             {/* Cards grid — 5 visible */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 16 }}>
               {trendingColours.slice(colourCarouselIdx, colourCarouselIdx + CARDS_VISIBLE).map((c, i) => (
-                <div key={colourCarouselIdx + i}
-                  onClick={() => handleColourClick(c)}
-                  style={{ borderRadius: 14, overflow: "hidden", cursor: "pointer", transition: "transform .3s, box-shadow .3s", display: "flex", flexDirection: "column", background: c.color }}
+                <a key={colourCarouselIdx + i} href={colourHref(c)}
+                  onClick={e => { e.preventDefault(); handleColourClick(c); }}
+                  style={{ ...aReset, borderRadius: 14, overflow: "hidden", cursor: "pointer", transition: "transform .3s, box-shadow .3s", display: "flex", flexDirection: "column", background: c.color }}
                   onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-7px)"; e.currentTarget.style.boxShadow = "0 24px 52px rgba(0,0,0,.2)"; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
                   {/* Swatch area */}
@@ -2053,12 +2093,12 @@ export default function PeacockPaintsWebsite() {
                     <h4 style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 2, textShadow: "0 1px 4px rgba(0,0,0,.3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}®</h4>
                     <p style={{ fontSize: 11, color: "rgba(255,255,255,.75)", marginBottom: 12, lineHeight: 1.4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.desc}</p>
                     <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
-                      <button onClick={e => { e.stopPropagation(); handleColourClick(c); }} style={{ flex: 1, padding: "7px 0", background: "#1a1a1a", color: "#fff", border: "none", borderRadius: 4, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Outfit',sans-serif", letterSpacing: .3 }}>Shop</button>
-                      <button onClick={e => e.stopPropagation()} style={{ flex: 1, padding: "7px 0", background: "transparent", color: "#fff", border: "1.5px solid rgba(255,255,255,.65)", borderRadius: 4, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>+ Sample</button>
-                      <button onClick={e => { e.stopPropagation(); handleColourClick(c); }} style={{ width: 30, height: 30, background: "rgba(255,255,255,.2)", border: "none", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", flexShrink: 0 }}><Arr /></button>
+                      <button onClick={e => { e.stopPropagation(); e.preventDefault(); handleColourClick(c); }} style={{ flex: 1, padding: "7px 0", background: "#1a1a1a", color: "#fff", border: "none", borderRadius: 4, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Outfit',sans-serif", letterSpacing: .3 }}>Shop</button>
+                      <button onClick={e => { e.stopPropagation(); e.preventDefault(); }} style={{ flex: 1, padding: "7px 0", background: "transparent", color: "#fff", border: "1.5px solid rgba(255,255,255,.65)", borderRadius: 4, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>+ Sample</button>
+                      <button onClick={e => { e.stopPropagation(); e.preventDefault(); handleColourClick(c); }} style={{ width: 30, height: 30, background: "rgba(255,255,255,.2)", border: "none", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", flexShrink: 0 }}><Arr /></button>
                     </div>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
             {/* Progress indicator */}
@@ -2094,7 +2134,7 @@ export default function PeacockPaintsWebsite() {
           )}
           <div className="g4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24 }}>
             {filteredProducts.map(p => (
-              <div key={p.id} onClick={() => openProduct(p)} style={{ background: "#fff", borderRadius: 12, border: "1px solid #eee", overflow: "hidden", cursor: "pointer", transition: "transform .3s, box-shadow .3s" }}
+              <a key={p.id} href={productHref(p)} onClick={e => { e.preventDefault(); openProduct(p); }} style={{ ...aReset, display: "block", background: "#fff", borderRadius: 12, border: "1px solid #eee", overflow: "hidden", cursor: "pointer", transition: "transform .3s, box-shadow .3s" }}
                 onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 12px 32px rgba(0,0,0,.1)"; }} onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
                 <div style={{ background: B.off, padding: "20px 16px", display: "flex", alignItems: "center", justifyContent: "center", height: 200, position: "relative" }}>
                   <img src={p.img} alt={p.name} style={{ maxHeight: 170, maxWidth: "80%", objectFit: "contain", filter: "drop-shadow(0 6px 12px rgba(0,0,0,.12))" }} />
@@ -2109,7 +2149,7 @@ export default function PeacockPaintsWebsite() {
                     <span style={{ fontSize: 12, color: "#999" }}>{p.sizes.map(s => s.size).join(" • ")}</span>
                   </div>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </section>
@@ -2144,7 +2184,7 @@ export default function PeacockPaintsWebsite() {
           <div className="g5" style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1fr 1.5fr", gap: 40, paddingBottom: 40 }}>
             <div><div style={{ marginBottom: 20 }}><img src={LOGO_FOOTER} alt="" style={{ height: 50, filter: "invert(1)", mixBlendMode: "screen", opacity: .9 }} /></div><p style={{ fontSize: 13, color: "rgba(255,255,255,.5)", lineHeight: 1.6 }}>The Painters' Paint. Premium paints for every room, surface, and style.</p></div>
             <div className="fc"><h4>Shop</h4><span>Colours</span><span>Paint</span><span>Accessories</span><span>Inspiration</span></div>
-            <div className="fc"><h4>Company</h4><span onClick={() => nav("about")}>About Us</span><span onClick={() => nav("sustainability")}>Sustainability</span><span onClick={() => nav("community")}>Community</span><span onClick={() => nav("foundation")}>Foundation</span></div>
+            <div className="fc"><h4>Company</h4><a href={makeHref("about")} onClick={e => { e.preventDefault(); nav("about"); }} style={aReset}>About Us</a><a href={makeHref("sustainability")} onClick={e => { e.preventDefault(); nav("sustainability"); }} style={aReset}>Sustainability</a><a href={makeHref("community")} onClick={e => { e.preventDefault(); nav("community"); }} style={aReset}>Community</a><a href={makeHref("foundation")} onClick={e => { e.preventDefault(); nav("foundation"); }} style={aReset}>Foundation</a></div>
             <div className="fc"><h4>Support</h4><span>Help & FAQs</span><span>Find Stockist</span><span>Delivery</span><span>Returns</span></div>
             <div className="fc"><h4>Contact</h4><p style={{ fontSize: 13, color: "rgba(255,255,255,.6)", lineHeight: 1.6, marginBottom: 16 }}>Questions? We're here to help.</p><p style={{ fontSize: 13, color: "rgba(255,255,255,.5)", marginBottom: 12 }}>Mon–Fri: 8:00–17:00</p><div style={{ display: "flex", gap: 16 }}><span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "rgba(255,255,255,.7)", cursor: "pointer" }}><PhoneIcon /> Call</span><span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "rgba(255,255,255,.7)", cursor: "pointer" }}><MailIcon /> Email</span></div></div>
           </div>
