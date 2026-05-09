@@ -121,7 +121,8 @@ const navData = [
   ]},
   { label: "Paints", columns: [
     { title: "Interior", links: ["Premium Matt Emulsion","Vinyl Silk Makula","Gloss Emulsion","Undercoat Emulsion"], footer: [{ label: "All interior paints" }] },
-    { title: "Exterior & Specialist", links: ["Weathershield","Road Marking Paint","Plaster Primer","Epoxy 2K Enamel"], footer: [{ label: "All specialist paints" }] },
+    { title: "Exterior", links: ["Weathershield","Road Marking Paint","Acrylic Elastometric Coating","Standard Hi Gloss","Mastic Paint"], footer: [{ label: "All exterior paints" }] },
+    { title: "Specialist", links: ["Plaster Primer","Epoxy 2K Enamel","Cellulose Enamel","2K Acrylic Polyurethane","Acrylic Art Paint"], footer: [{ label: "All specialist paints" }] },
     { title: "By Finish", links: ["Matt","Silk","Gloss","Satin","Eggshell","Textured","Masonry"] },
     { type: "promo", items: [{ title: "COLOUR COLLECTION", desc: "Over 2,000 shades", cta: "Discover", bg: "#c8d8e8" },{ title: "TOOLS & APPLICATION", desc: "Brushes, rollers & more", cta: "Shop", bg: "#e8dcc8" }]}
   ]},
@@ -718,6 +719,52 @@ const PaintBlob = ({ color, v = 0 }) => {
   return (<svg viewBox="0 0 100 95" style={{ width: "100%", height: "100%" }}><path d={p[v % 3]} fill={color} /></svg>);
 };
 
+// ═══════ PAINT CATEGORY PAGE ═══════
+const PaintCategoryPage = ({ category, title, subtitle, onOpenProduct, productHrefFn, homeHref, nav }) => {
+  const products = PRODUCTS.filter(p => p.category === category);
+  const fmtP = p => `UGX ${p.toLocaleString()}`;
+  const gradient = category === "interior"
+    ? `linear-gradient(135deg, ${B.coral}ee, ${B.coralDk})`
+    : `linear-gradient(135deg, ${B.teal}ee, ${B.tealDk})`;
+  return (
+    <div>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "16px 24px" }}>
+        <a href={homeHref} onClick={e => { e.preventDefault(); nav("home"); }} style={{ textDecoration: "none", color: B.coral, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}><ArrL /> Home</a>
+      </div>
+      <div style={{ background: gradient, padding: "60px 24px", color: "#fff", textAlign: "center" }}>
+        <p style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: 3, opacity: .8, marginBottom: 12, fontWeight: 600 }}>Professionals — Products</p>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 44, fontWeight: 600, marginBottom: 16 }}>{title}</h1>
+        <p style={{ fontSize: 16, opacity: .9, maxWidth: 600, margin: "0 auto", lineHeight: 1.6 }}>{subtitle}</p>
+      </div>
+      <section style={{ maxWidth: 1280, margin: "0 auto", padding: "60px 24px" }}>
+        <p style={{ fontSize: 15, color: "#666", marginBottom: 32 }}>{products.length} products available</p>
+        <div className="g4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24 }}>
+          {products.map(p => (
+            <a key={p.id} href={productHrefFn(p)} onClick={e => { e.preventDefault(); onOpenProduct(p); }}
+              style={{ textDecoration: "none", color: "inherit", display: "block", background: "#fff", borderRadius: 12, border: "1px solid #eee", overflow: "hidden", cursor: "pointer", transition: "transform .3s, box-shadow .3s" }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 12px 32px rgba(0,0,0,.1)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
+              <div style={{ background: B.off, padding: "20px 16px", display: "flex", alignItems: "center", justifyContent: "center", height: 200, position: "relative" }}>
+                <img src={p.img} alt={p.name} style={{ maxHeight: 170, maxWidth: "80%", objectFit: "contain", filter: "drop-shadow(0 6px 12px rgba(0,0,0,.12))" }} />
+                {p.tag && <span style={{ position: "absolute", top: 10, left: 10, background: p.tag === "Best Seller" ? B.coral : p.tag === "New" ? B.teal : p.tag === "Specialist" ? B.gold : "#5C2D6D", color: "#fff", fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 20 }}>{p.tag}</span>}
+                {p.grade && <span style={{ position: "absolute", top: 10, right: 10, background: "#fff", border: `2px solid ${B.coral}`, color: B.coral, fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20 }}>G{p.grade}</span>}
+              </div>
+              <div style={{ padding: "16px 18px 18px" }}>
+                <h4 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>{p.name}</h4>
+                <p style={{ fontSize: 12, color: "#777", lineHeight: 1.4, marginBottom: 10, minHeight: 34 }}>{p.desc}</p>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: B.coral }}>From {fmtP(p.sizes[0].price)}</span>
+                  <span style={{ fontSize: 12, color: "#999" }}>{p.sizes.map(s => s.size).join(" • ")}</span>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+};
+
 // ═══════ PRODUCT DETAIL PAGE ═══════
 const ProductDetailPage = ({ product, onBack, onAddToCart, onOpenProduct, cart }) => {
   const [selectedSize, setSelectedSize] = useState(0);
@@ -728,12 +775,18 @@ const ProductDetailPage = ({ product, onBack, onAddToCart, onOpenProduct, cart }
   const fmtPrice = (p) => `UGX ${p.toLocaleString()}`;
   const colourSectionRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedColourName, setSelectedColourName] = useState(null);
+  const [colourSizeIdx, setColourSizeIdx] = useState(0);
+  const [colourQty, setColourQty] = useState(1);
+  const [colourAddedAnim, setColourAddedAnim] = useState(false);
   const carouselRef = useRef(null);
   const scrollCarousel = (dir) => { if (carouselRef.current) carouselRef.current.scrollBy({ left: dir * 280, behavior: "smooth" }); };
   const hexRgba = (hex, a) => { const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; };
 
   const handleAdd = () => {
-    onAddToCart({ product, size: sz.size, price: sz.price, qty });
+    const item = { product, size: sz.size, price: sz.price, qty };
+    if (selectedColourName) item.colour = selectedColourName;
+    onAddToCart(item);
     setAddedAnim(true);
     setTimeout(() => setAddedAnim(false), 2000);
   };
@@ -822,12 +875,38 @@ const ProductDetailPage = ({ product, onBack, onAddToCart, onOpenProduct, cart }
               {total >= 200000 && <div style={{ display: "flex", alignItems: "center", gap: 6, color: B.teal, fontSize: 13, fontWeight: 600 }}><TruckIcon /> Free delivery</div>}
             </div>
 
+            {/* Selected colour indicator */}
+            {selectedColourName && (() => {
+              const colData = trendingColours.find(c => c.name === selectedColourName);
+              return (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: colData ? hexRgba(colData.color, 0.08) : B.off, borderRadius: 10, border: `1.5px solid ${colData ? hexRgba(colData.color, 0.3) : "#e0e0e0"}`, marginBottom: 12 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    {colData && <div style={{ width: 28, height: 28, borderRadius: "50%", background: colData.color, border: "2px solid #fff", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", flexShrink: 0 }} />}
+                    <div>
+                      <div style={{ fontSize: 11, color: "#999", textTransform: "uppercase", letterSpacing: 1, marginBottom: 1 }}>Colour</div>
+                      <div style={{ fontSize: 14, fontWeight: 600 }}>{selectedColourName}</div>
+                    </div>
+                  </div>
+                  <button onClick={() => setSelectedColourName(null)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "#999", padding: 4 }} title="Remove colour">×</button>
+                </div>
+              );
+            })()}
+
             <button onClick={handleAdd} style={{
               width: "100%", padding: "16px 32px", borderRadius: 10, border: "none", background: addedAnim ? B.teal : B.coral, color: "#fff",
               fontSize: 16, fontWeight: 600, cursor: "pointer", transition: "all 0.3s", fontFamily: "'Outfit', sans-serif",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 10, letterSpacing: 0.5, textTransform: "uppercase"
             }}>
               {addedAnim ? <><CheckIcon /> Added to Cart!</> : <><CartIcon /> Add to Cart</>}
+            </button>
+
+            <button
+              onClick={() => colourSectionRef.current?.scrollIntoView({ behavior: "smooth" })}
+              style={{ marginTop: 12, width: "100%", padding: "14px 24px", borderRadius: 10, border: `2px solid ${B.coral}`, background: "transparent", color: B.coral, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, letterSpacing: 0.5, textTransform: "uppercase", fontFamily: "'Outfit', sans-serif", transition: "all 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.background = B.coral; e.currentTarget.style.color = "#fff"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = B.coral; }}
+            >
+              <PaletteIcon /> {selectedColourName ? "Change Colour" : "Select Colour"}
             </button>
 
             {/* Specs */}
@@ -847,28 +926,13 @@ const ProductDetailPage = ({ product, onBack, onAddToCart, onOpenProduct, cart }
               ))}
             </div>
 
-            {/* Select Colour & Size CTA */}
-            <button
-              onClick={() => colourSectionRef.current?.scrollIntoView({ behavior: "smooth" })}
-              style={{ marginTop: 20, width: "100%", padding: "14px 24px", borderRadius: 10, border: `2px solid ${B.coral}`, background: "transparent", color: B.coral, fontSize: 15, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, letterSpacing: 0.5, textTransform: "uppercase", fontFamily: "'Outfit', sans-serif", transition: "all 0.2s" }}
-              onMouseEnter={e => { e.currentTarget.style.background = B.coral; e.currentTarget.style.color = "#fff"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = B.coral; }}
-            >
-              <PaletteIcon /> Select Colour & Size
-            </button>
           </div>
         </div>
 
-        {/* Full Description */}
-        <div style={{ marginTop: 60, paddingTop: 40, borderTop: "1px solid #e8e4de" }}>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 600, marginBottom: 24 }}>Product Description</h2>
-          {product.longDesc.split("\n\n").map((p, i) => (<p key={i} style={{ fontSize: 15, lineHeight: 1.85, color: "#555", marginBottom: 16, maxWidth: 800 }}>{p}</p>))}
-        </div>
-
-        {/* Colour & Size Selection */}
-        <div ref={colourSectionRef} style={{ marginTop: 60, paddingTop: 40, borderTop: "1px solid #e8e4de" }}>
+        {/* Colour & Size Selection — immediately visible */}
+        <div ref={colourSectionRef} style={{ marginTop: 48, paddingTop: 36, borderTop: "1px solid #e8e4de" }}>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 600, marginBottom: 8 }}>Select Colour & Size</h2>
-          <p style={{ fontSize: 15, color: "#777", marginBottom: 40 }}>Choose from our full range of colours available for this paint.</p>
+          <p style={{ fontSize: 15, color: "#777", marginBottom: 32 }}>Choose from our full range of colours available for this paint.</p>
 
           {/* Category Carousel */}
           <div style={{ position: "relative", paddingLeft: 28, paddingRight: 28 }}>
@@ -902,27 +966,91 @@ const ProductDetailPage = ({ product, onBack, onAddToCart, onOpenProduct, cart }
           {selectedCategory && (() => {
             const cat = COLOUR_CATEGORIES[selectedCategory];
             const colours = cat.colors.map(n => trendingColours.find(c => c.name === n)).filter(Boolean);
+            const isColourSelected = (name) => selectedColourName === name;
+            const colourSz = product.sizes[colourSizeIdx];
+            const colourTotal = colourSz.price * colourQty;
+            const handleColourSelect = (name) => {
+              if (selectedColourName === name) { setSelectedColourName(null); }
+              else { setSelectedColourName(name); setColourSizeIdx(0); setColourQty(1); setColourAddedAnim(false); }
+            };
+            const handleColourAdd = () => {
+              onAddToCart({ product, size: colourSz.size, price: colourSz.price, qty: colourQty, colour: selectedColourName });
+              setColourAddedAnim(true);
+              setTimeout(() => setColourAddedAnim(false), 2000);
+            };
             return (
               <div style={{ marginTop: 48 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24 }}>
-                  {colours.map(col => (
-                    <div key={col.name}>
-                      <div style={{ background: hexRgba(col.color, 0.12), borderRadius: 12, padding: "28px 16px", display: "flex", alignItems: "center", justifyContent: "center", height: 200, marginBottom: 14 }}>
-                        <div style={{ width: 130, height: 130, background: col.color, borderRadius: "52% 48% 56% 44% / 48% 52% 48% 52%", boxShadow: `0 10px 28px ${hexRgba(col.color, 0.5)}, inset 0 -6px 16px rgba(0,0,0,0.18), inset 0 6px 14px rgba(255,255,255,0.22)` }} />
+                  {colours.map(col => {
+                    const active = isColourSelected(col.name);
+                    return (
+                    <div key={col.name} style={{ border: active ? `2px solid ${B.coral}` : "2px solid transparent", borderRadius: 16, padding: active ? 14 : 0, transition: "all 0.2s" }}>
+                      <div onClick={() => handleColourSelect(col.name)} style={{ cursor: "pointer" }}>
+                        <div style={{ background: hexRgba(col.color, 0.12), borderRadius: 12, padding: "28px 16px", display: "flex", alignItems: "center", justifyContent: "center", height: 200, marginBottom: 14, position: "relative" }}>
+                          <div style={{ width: 130, height: 130, background: col.color, borderRadius: "52% 48% 56% 44% / 48% 52% 48% 52%", boxShadow: `0 10px 28px ${hexRgba(col.color, 0.5)}, inset 0 -6px 16px rgba(0,0,0,0.18), inset 0 6px 14px rgba(255,255,255,0.22)` }} />
+                          {active && <div style={{ position: "absolute", top: 10, right: 10, width: 26, height: 26, borderRadius: "50%", background: B.coral, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}><CheckIcon /></div>}
+                        </div>
+                        <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 3, color: active ? B.coral : "#333" }}>{col.name}</div>
+                        <div style={{ fontSize: 13, color: "#999", marginBottom: 8 }}>{col.desc}</div>
                       </div>
-                      <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 3 }}>{col.name}</div>
-                      <div style={{ fontSize: 13, color: "#999", marginBottom: 8 }}>{col.desc}</div>
-                      <div style={{ fontSize: 14, marginBottom: 3 }}>From <strong>{fmtPrice(product.sizes[0].price)}</strong></div>
-                      <div style={{ fontSize: 12, color: "#bbb", marginBottom: 12 }}>{product.sizes.map(s => s.size).join(" · ")}</div>
-                      <button style={{ display: "flex", alignItems: "center", gap: 6, border: "1px solid #ddd", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer", background: "#fff", color: "#333", fontFamily: "'Outfit', sans-serif" }}>
-                        Select sizes&nbsp;<Arr />
-                      </button>
+
+                      {!active ? (
+                        <>
+                          <div style={{ fontSize: 14, marginBottom: 3 }}>From <strong>{fmtPrice(product.sizes[0].price)}</strong></div>
+                          <div style={{ fontSize: 12, color: "#bbb", marginBottom: 12 }}>{product.sizes.map(s => s.size).join(" · ")}</div>
+                          <button onClick={() => handleColourSelect(col.name)} style={{ display: "flex", alignItems: "center", gap: 6, border: "1px solid #ddd", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer", background: "#fff", color: "#333", fontFamily: "'Outfit', sans-serif" }}>
+                            Select sizes&nbsp;<Arr />
+                          </button>
+                        </>
+                      ) : (
+                        <div style={{ marginTop: 8 }}>
+                          {/* Size pills */}
+                          <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: "#999", display: "block", marginBottom: 8 }}>Size</label>
+                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
+                            {product.sizes.map((s, i) => (
+                              <button key={i} onClick={() => { setColourSizeIdx(i); setColourQty(1); }} style={{
+                                padding: "8px 14px", borderRadius: 8, border: `2px solid ${colourSizeIdx === i ? B.coral : "#e0e0e0"}`,
+                                background: colourSizeIdx === i ? `${B.coral}10` : "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600,
+                                color: colourSizeIdx === i ? B.coral : "#333", fontFamily: "'Outfit', sans-serif", transition: "all 0.2s"
+                              }}>
+                                {s.size}
+                              </button>
+                            ))}
+                          </div>
+                          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>{fmtPrice(colourSz.price)} <span style={{ fontWeight: 400, fontSize: 12, color: "#999" }}>/ {colourSz.coverage}</span></div>
+
+                          {/* Quantity */}
+                          <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: "#999", display: "block", marginBottom: 8 }}>Qty</label>
+                          <div style={{ display: "flex", alignItems: "center", border: "1.5px solid #e0e0e0", borderRadius: 8, overflow: "hidden", width: "fit-content", marginBottom: 14 }}>
+                            <button onClick={() => setColourQty(Math.max(1, colourQty - 1))} style={{ width: 36, height: 36, border: "none", background: colourQty <= 1 ? "#f5f5f5" : "#fff", cursor: colourQty <= 1 ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: colourQty <= 1 ? "#ccc" : "#333" }}><MinusIcon /></button>
+                            <div style={{ width: 40, height: 36, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 600, borderLeft: "1px solid #e0e0e0", borderRight: "1px solid #e0e0e0" }}>{colourQty}</div>
+                            <button onClick={() => setColourQty(Math.min(50, colourQty + 1))} style={{ width: 36, height: 36, border: "none", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><PlusIcon /></button>
+                          </div>
+
+                          {/* Total + Add to Cart */}
+                          <div style={{ fontSize: 13, color: "#777", marginBottom: 10 }}>{colourQty} × {colourSz.size} = <strong style={{ color: B.coral }}>{fmtPrice(colourTotal)}</strong></div>
+                          <button onClick={handleColourAdd} style={{
+                            width: "100%", padding: "12px", borderRadius: 8, border: "none",
+                            background: colourAddedAnim ? B.teal : B.coral, color: "#fff",
+                            fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "all 0.3s",
+                            fontFamily: "'Outfit', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8
+                          }}>
+                            {colourAddedAnim ? <><CheckIcon /> Added!</> : <><CartIcon /> Add to Cart</>}
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  ))}
+                  );})}
                 </div>
               </div>
             );
           })()}
+        </div>
+
+        {/* Full Description */}
+        <div style={{ marginTop: 60, paddingTop: 40, borderTop: "1px solid #e8e4de" }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 600, marginBottom: 24 }}>Product Description</h2>
+          {product.longDesc.split("\n\n").map((p, i) => (<p key={i} style={{ fontSize: 15, lineHeight: 1.85, color: "#555", marginBottom: 16, maxWidth: 800 }}>{p}</p>))}
         </div>
 
         {/* Related Products */}
@@ -1533,7 +1661,7 @@ const ColourDetailPage = ({ colour, categoryName, onBack, onBackHome, onAddToCar
   const handleAddToCart = () => {
     if (!selectedProd || !selectedSz) return;
     const sz = selectedProd.sizes.find(s => s.size === selectedSz);
-    if (onAddToCart) onAddToCart({ product: selectedProd, size: sz.size, price: sz.price, qty: buyQty });
+    if (onAddToCart) onAddToCart({ product: selectedProd, size: sz.size, price: sz.price, qty: buyQty, colour: colour.name });
     setBuyAdded(true);
     setTimeout(() => { setBuyOpen(false); setBuyAdded(false); setSelectedProd(null); setSelectedSz(null); setBuyQty(1); }, 1800);
   };
@@ -1836,7 +1964,7 @@ export default function PeacockPaintsWebsite() {
   const mE = i => { clearTimeout(mRef.current); setActiveMenu(i); };
   const mL = () => { mRef.current = setTimeout(() => setActiveMenu(null), 200); };
   const nav = p => { setPg(p); setSelectedProduct(null); setActiveMenu(null); setMobMenu(false); setMobSub(null); window.scrollTo({ top: 0, behavior: "smooth" }); window.history.replaceState(null, "", `#/${p}`); };
-  const openProduct = (p) => { setSelectedProduct(p); setPg("product"); window.scrollTo({ top: 0, behavior: "smooth" }); window.history.replaceState(null, "", `#/product/${p.id}`); };
+  const openProduct = (p) => { setSelectedProduct(p); setPg("product"); setActiveMenu(null); setMobMenu(false); setMobSub(null); window.scrollTo({ top: 0, behavior: "smooth" }); window.history.replaceState(null, "", `#/product/${p.id}`); };
 
   // ─── Hash URL helpers ───
   const makeHref = (slug) => `#/${slug}`;
@@ -1845,8 +1973,8 @@ export default function PeacockPaintsWebsite() {
   const aReset = { textDecoration: "none", color: "inherit" };
   const addToCart = (item) => {
     setCart(prev => {
-      const existing = prev.find(c => c.product.id === item.product.id && c.size === item.size);
-      if (existing) return prev.map(c => c.product.id === item.product.id && c.size === item.size ? { ...c, qty: c.qty + item.qty } : c);
+      const existing = prev.find(c => c.product.id === item.product.id && c.size === item.size && (c.colour || null) === (item.colour || null));
+      if (existing) return prev.map(c => c.product.id === item.product.id && c.size === item.size && (c.colour || null) === (item.colour || null) ? { ...c, qty: c.qty + item.qty } : c);
       return [...prev, item];
     });
   };
@@ -2000,7 +2128,7 @@ export default function PeacockPaintsWebsite() {
                 </div>) : (<div>
                   <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5, color: B.coral, marginBottom: 14 }}>{col.title}</h3>
                   {col.links.map((l, li) => {
-                    const pageMap = {"Bedroom": "bedroom-inspiration", "Living Room": "livingroom-inspiration", "Dining Room": "diningroom-inspiration", "Kitchen": "kitchen-inspiration", "Bathroom": "bathroom-inspiration", "Whites": "whites-colour", "Creams": "creams-colour", "Neutrals": "neutrals-colour", "Pinks": "pinks-colour", "Yellows": "yellows-colour", "Greens": "greens-colour", "Blues": "blues-colour", "Greys": "greys-colour", "Metallics": "metallics-colour", "Contemporary": "contemporary-style", "Modern": "modern-style", "Boho": "boho-style", "Farmhouse": "farmhouse-style", "Scandi": "scandi-style", "Eclectic": "eclectic-style"};
+                    const pageMap = {"Bedroom": "bedroom-inspiration", "Living Room": "livingroom-inspiration", "Dining Room": "diningroom-inspiration", "Kitchen": "kitchen-inspiration", "Bathroom": "bathroom-inspiration", "Whites": "whites-colour", "Creams": "creams-colour", "Neutrals": "neutrals-colour", "Pinks": "pinks-colour", "Yellows": "yellows-colour", "Greens": "greens-colour", "Blues": "blues-colour", "Greys": "greys-colour", "Metallics": "metallics-colour", "Contemporary": "contemporary-style", "Modern": "modern-style", "Boho": "boho-style", "Farmhouse": "farmhouse-style", "Scandi": "scandi-style", "Eclectic": "eclectic-style", "Interior Paint": "interior-paint", "Exterior Paint": "exterior-paint"};
                     const isFinishLink = col.title === "By Finish";
                     const isPageLink = !!pageMap[l];
                     const linkedProduct = PRODUCTS.find(p => p.name === l);
@@ -2043,19 +2171,28 @@ export default function PeacockPaintsWebsite() {
             </div>
           ) : (<>
             <div style={{ padding: "16px 24px", flex: 1 }}>
-              {cart.map((item, i) => (
+              {cart.map((item, i) => {
+                const colourData = item.colour ? trendingColours.find(c => c.name === item.colour) : null;
+                return (
                 <div key={i} style={{ display: "flex", gap: 16, padding: "16px 0", borderBottom: "1px solid #f0f0f0" }}>
-                  <div style={{ width: 64, height: 64, background: B.off, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <div style={{ width: 64, height: 64, background: B.off, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
                     <img src={item.product.img} alt="" style={{ maxHeight: 54, maxWidth: 54, objectFit: "contain" }} />
+                    {colourData && <div style={{ position: "absolute", bottom: -4, right: -4, width: 22, height: 22, borderRadius: "50%", background: colourData.color, border: "2px solid #fff", boxShadow: "0 1px 4px rgba(0,0,0,0.15)" }} />}
                   </div>
                   <div style={{ flex: 1 }}>
                     <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 2 }}>{item.product.name}</h4>
+                    {item.colour && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                        {colourData && <div style={{ width: 14, height: 14, borderRadius: "50%", background: colourData.color, border: "1px solid rgba(0,0,0,0.1)", flexShrink: 0 }} />}
+                        <span style={{ fontSize: 12, fontWeight: 500, color: "#555" }}>{item.colour}</span>
+                      </div>
+                    )}
                     <p style={{ fontSize: 12, color: "#999" }}>{item.size} × {item.qty}</p>
                     <p style={{ fontSize: 14, fontWeight: 600, color: B.coral, marginTop: 4 }}>{fmtP(item.price * item.qty)}</p>
                   </div>
                   <button onClick={() => removeFromCart(i)} style={{ background: "none", border: "none", cursor: "pointer", color: "#ccc", fontSize: 18, alignSelf: "flex-start" }}>×</button>
                 </div>
-              ))}
+              );})}
             </div>
             <div style={{ padding: "20px 24px", borderTop: "2px solid #eee" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
@@ -2101,7 +2238,11 @@ export default function PeacockPaintsWebsite() {
       </>)}
 
       {/* ═══ PAGES ═══ */}
-      {pg === "product" && selectedProduct ? (
+      {pg === "interior-paint" ? (
+        <PaintCategoryPage category="interior" title="Interior Paints" subtitle="Premium interior paints for every room — from smooth matts to washable silks and high-gloss finishes." onOpenProduct={openProduct} productHrefFn={productHref} homeHref={makeHref("home")} nav={nav} />
+      ) : pg === "exterior-paint" ? (
+        <PaintCategoryPage category="exterior" title="Exterior Paints" subtitle="Durable exterior coatings engineered for East Africa's climate — protecting and beautifying your building for years." onOpenProduct={openProduct} productHrefFn={productHref} homeHref={makeHref("home")} nav={nav} />
+      ) : pg === "product" && selectedProduct ? (
         <ProductDetailPage product={selectedProduct} onBack={() => nav("home")} onAddToCart={addToCart} onOpenProduct={openProduct} cart={cart} />
       ) : pg === "bedroom-inspiration" ? (
         <><div style={{ maxWidth: 1280, margin: "0 auto", padding: "16px 24px" }}><a href={makeHref("home")} onClick={e => { e.preventDefault(); nav("home"); }} style={{ ...aReset, fontSize: 13, color: B.coral, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}><ArrL /> Home</a></div>
