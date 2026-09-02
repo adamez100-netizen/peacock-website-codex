@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 
 // ─── IMAGE IMPORTS ───
 import LOGO_HEADER from "./assets/logos/header.png";
-import LOGO_HERO from "./assets/logos/hero.png";
 import LOGO_FOOTER from "./assets/logos/footer.png";
 import IMG_PREMIUM from "./assets/products/premium.png";
 import IMG_VINYL from "./assets/products/vinyl.png";
@@ -104,6 +103,24 @@ const PRODUCTS = [
   { id: "pearl-coat", name: "Pearl Coat", category: "specialist", desc: "Water-based polychromatic pearl finish with a unique washable sheen for interior and exterior environments.", longDesc: "Peacock Pearl Coat is a water-based polychromatic finish made with selected pearl material to deliver a unique sheen. It is eco-friendly, non-toxic, odourless, washable, and safe for interior and exterior environments.\n\nDegrease thoroughly to remove oil and grease, confirm there is no water seepage, and prime with Peacock Latex Primer Sealer matched to your chosen Pearl Coat emulsion colour.\n\nDilute 4 litres of paint with 1 litre of water. Apply by roller, brush, or spray, noting that coverage may vary depending on the chosen paint pattern.", sizes: [{ size: "500ML", price: 22000, coverage: "2.5-3m²" }, { size: "1L", price: 40000, coverage: "5-6m²" }, { size: "4L", price: 130000, coverage: "20-24m²" }], img: IMG_PEARL_COAT, tag: "New", colours: "Pearl colours", finish: "Pearl sheen", dryTime: "Fast drying", coats: "2 coats recommended", surface: "Interior & exterior walls", rating: 4.8, reviews: 22 },
   { id: "sync-thinner", name: "Sync Thinner", category: "specialist", desc: "Professional thinner for compatible Peacock systems, including NC Sanding Sealer dilution.", longDesc: "Peacock Sync Thinner is a professional-use thinner for compatible Peacock coating systems. It is specified for thinning Peacock NC Sanding Sealer before wood-care application.\n\nUse with the matching coating system according to the recommended dilution instructions. For NC Sanding Sealer, mix 4 litres of sealer with 2 litres of Sync Thinner.\n\nThis product is highly flammable and should be handled with gloves, a mask, and eye protection, then stored safely in a cool dry place.", sizes: [{ size: "5L", price: 85000, coverage: "Use as recommended" }], img: null, tag: "Specialist", colours: "Clear", finish: "Thinner", dryTime: "N/A", coats: "Use as required", surface: "Compatible Peacock coating systems", rating: 4.5, reviews: 16 },
 ];
+
+const SAMPLE_POT = {
+  id: "colour-sample",
+  name: "Colour sample pot",
+  category: "samples",
+  desc: "A tester pot to see the shade in your light.",
+  img: null,
+  sizes: [{ size: "100ml", price: 3000, coverage: "tester" }],
+};
+
+const SAMPLE_BUNDLE = {
+  id: "sample-bundle",
+  name: "5 colour sample pots",
+  category: "samples",
+  desc: "Five tester pots delivered for UGX 15,000.",
+  img: null,
+  sizes: [{ size: "5 pots", price: 15000, coverage: "5 testers" }],
+};
 
 // ─── Our Story Pages ───
 const storyPages = {
@@ -1203,7 +1220,7 @@ const ROOM_META = {
   "Bathroom":    { slug: "bathroom-inspiration",     gradient: "linear-gradient(135deg, #1a4a5e, #2868a8 50%, #8ABAB2)", subtitle: "Create your own spa-like retreat" },
 };
 
-const RoomInspirationPage = ({ roomName, inspirations, onBack, nav }) => {
+const RoomInspirationPage = ({ roomName, inspirations, onBack, nav, onAddSample, onAddSampleBundle }) => {
   const [selected, setSelected] = useState(null);
   const [lightbox, setLightbox] = useState(null);
   const meta = ROOM_META[roomName] || {};
@@ -1253,7 +1270,11 @@ const RoomInspirationPage = ({ roomName, inspirations, onBack, nav }) => {
                   <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 1, color: "#999", marginBottom: 2 }}>Featured Colour</div>
                   <div style={{ fontSize: 18, fontWeight: 600 }}>{selected.color}</div>
                 </div>
-                <button className="btn bp" style={{ marginLeft: "auto", fontSize: 12, padding: "10px 20px" }}>Order Sample</button>
+                <button className="btn bp" onClick={() => {
+                  const colourName = selected.color.replace(/®/g, "").trim();
+                  const match = trendingColours.find(c => c.name === colourName);
+                  if (match) onAddSample(match.name);
+                }} style={{ marginLeft: "auto", fontSize: 12, padding: "10px 20px" }}>Order Sample</button>
               </div>
 
               {/* Recommended Products */}
@@ -1287,7 +1308,7 @@ const RoomInspirationPage = ({ roomName, inspirations, onBack, nav }) => {
               <div style={{ marginTop: 24, background: B.black, borderRadius: 16, padding: 32, color: "#fff", textAlign: "center" }}>
                 <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, marginBottom: 8 }}>Love this look?</h3>
                 <p style={{ fontSize: 14, opacity: .7, marginBottom: 20 }}>Get colour samples delivered to your door</p>
-                <button className="btn bp" style={{ fontSize: 14 }}>Order Samples</button>
+                <button className="btn bp" onClick={onAddSampleBundle} style={{ fontSize: 14 }}>Order Samples</button>
               </div>
             </div>
           </div>
@@ -1422,7 +1443,7 @@ const RoomInspirationPage = ({ roomName, inspirations, onBack, nav }) => {
 };
 
 // ═══════ COLOUR CATEGORY PAGE ═══════
-const ColourCategoryPage = ({ categoryName, categoryData, allColours, onBack, onNavCategory, onOpenColour, homeHref, colourHrefFn, catHrefFn }) => {
+const ColourCategoryPage = ({ categoryName, categoryData, allColours, onBack, onNavCategory, onOpenColour, onAddSample, onAddSampleBundle, onViewAllColours, homeHref, colourHrefFn, catHrefFn }) => {
   const categoryColors = allColours.filter(c => categoryData.colors.includes(c.name));
   const otherCats = Object.entries(COLOUR_CATEGORIES).filter(([k]) => k !== categoryName);
 
@@ -1487,7 +1508,7 @@ const ColourCategoryPage = ({ categoryName, categoryData, allColours, onBack, on
                 <p style={{ fontSize: 12, color: "#888", lineHeight: 1.5, marginBottom: 12, minHeight: 34 }}>{c.desc}</p>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <code style={{ fontSize: 11, color: "#bbb", fontFamily: "monospace", letterSpacing: .5 }}>{c.color}</code>
-                  <button style={{ fontSize: 11, fontWeight: 600, color: B.coral, background: `${B.coral}12`, border: "none", padding: "4px 10px", borderRadius: 12, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>Sample</button>
+                  <button onClick={e => { e.stopPropagation(); e.preventDefault(); onAddSample(c.name); }} style={{ fontSize: 11, fontWeight: 600, color: B.coral, background: `${B.coral}12`, border: "none", padding: "4px 10px", borderRadius: 12, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>Sample</button>
                 </div>
               </div>
             </a>
@@ -1501,8 +1522,8 @@ const ColourCategoryPage = ({ categoryName, categoryData, allColours, onBack, on
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 600, marginBottom: 12 }}>Try before you buy</h2>
           <p style={{ fontSize: 15, opacity: .7, marginBottom: 28, lineHeight: 1.6 }}>Get 5 colour samples delivered to your door for just UGX 15,000</p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <button className="btn bp">Order Samples</button>
-            <button className="btn bo">View All Colours</button>
+            <button className="btn bp" onClick={onAddSampleBundle}>Order Samples</button>
+            <button className="btn bo" onClick={onViewAllColours}>View All Colours</button>
           </div>
         </div>
       </section>
@@ -1531,7 +1552,7 @@ const ColourCategoryPage = ({ categoryName, categoryData, allColours, onBack, on
 };
 
 // ═══════ STYLE CATEGORY PAGE ═══════
-const StyleCategoryPage = ({ styleName, styleData, allColours, onBack, onNavStyle, onOpenColour, homeHref, colourHrefFn, styleHrefFn }) => {
+const StyleCategoryPage = ({ styleName, styleData, allColours, onBack, onNavStyle, onOpenColour, onAddSample, onAddSampleBundle, onViewAllColours, homeHref, colourHrefFn, styleHrefFn }) => {
   const styleColors = allColours.filter(c => styleData.colors.includes(c.name));
   const otherStyles = Object.entries(STYLE_CATEGORIES).filter(([k]) => k !== styleName);
 
@@ -1600,7 +1621,7 @@ const StyleCategoryPage = ({ styleName, styleData, allColours, onBack, onNavStyl
                 <p style={{ fontSize: 12, color: "#888", lineHeight: 1.5, marginBottom: 12, minHeight: 34 }}>{c.desc}</p>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <code style={{ fontSize: 11, color: "#bbb", fontFamily: "monospace", letterSpacing: .5 }}>{c.color}</code>
-                  <button style={{ fontSize: 11, fontWeight: 600, color: B.coral, background: `${B.coral}12`, border: "none", padding: "4px 10px", borderRadius: 12, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>Sample</button>
+                  <button onClick={e => { e.stopPropagation(); e.preventDefault(); onAddSample(c.name); }} style={{ fontSize: 11, fontWeight: 600, color: B.coral, background: `${B.coral}12`, border: "none", padding: "4px 10px", borderRadius: 12, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>Sample</button>
                 </div>
               </div>
             </a>
@@ -1614,8 +1635,8 @@ const StyleCategoryPage = ({ styleName, styleData, allColours, onBack, onNavStyl
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 600, marginBottom: 12 }}>Try before you buy</h2>
           <p style={{ fontSize: 15, opacity: .7, marginBottom: 28, lineHeight: 1.6 }}>Get 5 colour samples delivered to your door for just UGX 15,000</p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <button className="btn bp">Order Samples</button>
-            <button className="btn bo">View All Colours</button>
+            <button className="btn bp" onClick={onAddSampleBundle}>Order Samples</button>
+            <button className="btn bo" onClick={onViewAllColours}>View All Colours</button>
           </div>
         </div>
       </section>
@@ -1656,7 +1677,7 @@ const StyleCategoryPage = ({ styleName, styleData, allColours, onBack, onNavStyl
 // ═══════ COLOUR DETAIL PAGE ═══════
 const PAINT_RECOMMENDATIONS = PRODUCTS; // all 12 products
 
-const ColourDetailPage = ({ colour, categoryName, onBack, onBackHome, onAddToCart, homeHref, backHref }) => {
+const ColourDetailPage = ({ colour, categoryName, onBack, onBackHome, onAddToCart, onAddSample, homeHref, backHref }) => {
   const [imgIdx, setImgIdx] = useState(0);
   const [buyOpen, setBuyOpen] = useState(false);
   const [selectedProd, setSelectedProd] = useState(null);
@@ -1759,7 +1780,7 @@ const ColourDetailPage = ({ colour, categoryName, onBack, onBackHome, onAddToCar
               color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer",
               fontFamily: "'Outfit',sans-serif", letterSpacing: .5, borderRadius: 2,
             }}>Buy Paint</button>
-            <button style={{
+            <button onClick={() => onAddSample(colour.name)} style={{
               flex: 1, padding: "14px 20px",
               border: "2px solid rgba(0,0,0,.38)", background: "transparent",
               color: "#1a1a1a", fontSize: 14, fontWeight: 600, cursor: "pointer",
@@ -1919,6 +1940,7 @@ export default function PeacockPaintsWebsite() {
   const [mobSub, setMobSub] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [heroSlide, setHeroSlide] = useState(0);
+  const [heroPaused, setHeroPaused] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [pg, setPg] = useState("home");
   const [prodTab, setProdTab] = useState("all");
@@ -1938,7 +1960,11 @@ export default function PeacockPaintsWebsite() {
   const scrollToProdPending = useRef(false);
 
   useEffect(() => { const h = () => setScrolled(window.scrollY > 50); window.addEventListener("scroll", h); return () => window.removeEventListener("scroll", h); }, []);
-  useEffect(() => { const t = setInterval(() => setHeroSlide(s => (s + 1) % 2), 6000); return () => clearInterval(t); }, []);
+  useEffect(() => {
+    if (heroPaused) return undefined;
+    const t = setInterval(() => setHeroSlide(s => (s + 1) % 3), 6500);
+    return () => clearInterval(t);
+  }, [heroPaused]);
 
   // ─── Hash-based routing: restore page from URL on mount / new tab ───
   useEffect(() => {
@@ -1988,16 +2014,100 @@ export default function PeacockPaintsWebsite() {
       return [...prev, item];
     });
   };
+  const addSamplePot = (colourName) => {
+    addToCart({ product: SAMPLE_POT, size: "100ml", price: 3000, qty: 1, colour: colourName });
+    setCartOpen(true);
+  };
+  const addSampleBundle = () => {
+    addToCart({ product: SAMPLE_BUNDLE, size: "5 pots", price: 15000, qty: 1, colour: null });
+    setCartOpen(true);
+  };
   const removeFromCart = (idx) => setCart(prev => prev.filter((_, i) => i !== idx));
   const cartTotal = cart.reduce((sum, c) => sum + c.price * c.qty, 0);
   const cartCount = cart.reduce((sum, c) => sum + c.qty, 0);
   const fmtP = p => `UGX ${p.toLocaleString()}`;
+  const weathershield = PRODUCTS.find(p => p.id === "weathershield");
   const iconFor = s => ({ globe: <GlobeIcon/>, heart: <HeartIcon/>, palette: <PaletteIcon/>, users: <UsersIcon/>, leaf: <LeafIcon/>, truck: <TruckIcon/> }[s] || <PaletteIcon/>);
 
   const heroSlides = [
-    { bg: `linear-gradient(135deg, #1a1a1a, #2a2a2a 40%, ${B.coralDk})`, tagline: "colours to transform rooms, moods and moments", cta1: "Shop Paints", cta2: "Shop Colours" },
-    { bg: `linear-gradient(135deg, ${B.tealDk}, ${B.teal} 50%, ${B.gold})`, tagline: "Glorious greens — find a shade that brings the outside in", cta1: "Shop Now", cta2: "Explore" },
+    {
+      eyebrow: "New colour studio",
+      title: "Paint your next room before the first brush stroke.",
+      copy: "Compare Peacock shades, finishes, and real products in one warm studio built for homes, schools, shops, and site teams.",
+      accent: "#ff4d8b",
+      roomImg: INSPO_SCANDI_SAGE,
+      swatches: [
+        { name: "Rose", color: "#CC7B8C" },
+        { name: "Balm", color: "#CADCCB" },
+        { name: "Medallion", color: "#C49820" },
+        { name: "Denim", color: "#1E3A68" },
+      ],
+      note: "Interior walls",
+      cta2: "Explore colours",
+      cta2Page: "colours",
+    },
+    {
+      eyebrow: "Colour at home",
+      title: "Give living rooms colour that holds its nerve.",
+      copy: "Warm neutrals, rich masonry tones, and practical coverage details help every interior feel deliberate.",
+      accent: "#1a3a3a",
+      roomImg: INSPO_LR_PALE_BEIGE,
+      swatches: [
+        { name: "Lake Green", color: "#BFCA9E" },
+        { name: "Tandoori", color: "#8E3020" },
+        { name: "Cool Blue", color: "#A8C6D6" },
+        { name: "Havana", color: "#3E5030" },
+      ],
+      note: "Living room",
+      cta2: "Explore colours",
+      cta2Page: "colours",
+    },
+    {
+      eyebrow: "Specialist finishes",
+      title: "From polished walls to tough workshop floors.",
+      copy: "Browse coatings for wood, vehicles, decorative walls, and industrial surfaces with the same colour-first energy.",
+      accent: "#b8a4ed",
+      roomImg: INSPO_KT_CREAM,
+      swatches: [
+        { name: "Violet Bouquet", color: "#C0A0C8" },
+        { name: "Copper", color: "#AD6040" },
+        { name: "Pearl", color: "#EEE7C5" },
+        { name: "Signal Blue", color: "#2848A0" },
+      ],
+      note: "Specialist systems",
+      cta2: "Specialist finishes",
+      cta2Page: "specialist",
+    },
   ];
+  const currentHero = heroSlides[heroSlide] || heroSlides[0];
+  const openHeroProductGrid = (tab = "all") => {
+    setPg("home");
+    setSelectedProduct(null);
+    setProdTab(tab);
+    setFinishFilter(null);
+    setActiveMenu(null);
+    setMobMenu(false);
+    setMobSub(null);
+    setTimeout(() => prodSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+  };
+  const shopHeroProducts = () => openHeroProductGrid("all");
+  const exploreHero = () => {
+    if (currentHero.cta2Page === "colours") { nav("all-colours"); return; }
+    if (currentHero.cta2Page === "specialist") { openHeroProductGrid("specialist"); return; }
+    nav(currentHero.cta2Page);
+  };
+  const showHeroSlide = (idx) => setHeroSlide((idx + heroSlides.length) % heroSlides.length);
+  const openHeroSwatch = (swatch) => {
+    const match = trendingColours.find(c => c.name === swatch.name);
+    if (match) handleColourClick(match);
+  };
+  const handleMegaFooter = (label) => {
+    if (label === "Shop all colours") nav("all-colours");
+    if (label === "All interior paints") nav("interior-paint");
+    if (label === "All exterior paints") nav("exterior-paint");
+    if (label === "All specialist paints") openHeroProductGrid("specialist");
+    if (label === "Get inspired") nav("bedroom-inspiration");
+  };
 
   const filteredProducts = PRODUCTS.filter(p => {
     const catOk = prodTab === "all" || p.category === prodTab;
@@ -2053,6 +2163,55 @@ export default function PeacockPaintsWebsite() {
         .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; border-radius: 4px; font-weight: 500; font-size: 14px; letter-spacing: .5px; text-transform: uppercase; cursor: pointer; transition: all .3s; border: none; font-family: 'Outfit',sans-serif; }
         .bp { background: ${B.coral}; color: #fff; } .bp:hover { background: ${B.coralDk}; }
         .bo { background: transparent; color: #fff; border: 2px solid #fff; } .bo:hover { background: rgba(255,255,255,.15); }
+        .paint-hero { position: relative; overflow: hidden; background: #fffaf0; color: #0a0a0a; border-bottom: 1px solid #ece4d4; }
+        .paint-hero-shell { max-width: 1280px; margin: 0 auto; padding: 72px 24px 34px; min-height: 620px; display: grid; grid-template-columns: minmax(0, .95fr) minmax(420px, 1.05fr); gap: 56px; align-items: center; }
+        .paint-hero-copy { position: relative; z-index: 2; }
+        .paint-hero-kicker { display: inline-flex; align-items: center; gap: 10px; min-height: 40px; padding: 8px 14px 8px 8px; border-radius: 999px; background: #f5f0e0; font-size: 14px; font-weight: 600; margin-bottom: 24px; }
+        .paint-hero-kicker span { width: 24px; height: 24px; border-radius: 50%; background: var(--hero-accent); box-shadow: inset 0 0 0 5px rgba(255,255,255,.38); }
+        .paint-hero-title { font-size: 62px; line-height: 1.04; letter-spacing: 0; font-weight: 700; max-width: 690px; margin-bottom: 22px; }
+        .paint-hero-copy p { max-width: 570px; font-size: 18px; line-height: 1.65; color: #3a3a3a; margin-bottom: 30px; }
+        .paint-hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 34px; }
+        .paint-hero-action { min-height: 48px; border-radius: 12px; padding: 0 22px; display: inline-flex; align-items: center; gap: 9px; border: 1px solid #0a0a0a; background: #0a0a0a; color: #fff; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform .2s, background .2s, color .2s; }
+        .paint-hero-action:hover { transform: translateY(-2px); background: #1f1f1f; }
+        .paint-hero-action.secondary { background: #fffaf0; color: #0a0a0a; border-color: #d8cfbf; }
+        .paint-hero-action.secondary:hover { background: #f5f0e0; }
+        .paint-hero-proof { display: grid; grid-template-columns: repeat(3, minmax(0, 138px)); gap: 12px; max-width: 520px; }
+        .paint-hero-proof div { border-top: 1px solid #e5dccb; padding-top: 12px; }
+        .paint-hero-proof strong { display: block; font-size: 22px; line-height: 1; margin-bottom: 5px; }
+        .paint-hero-proof span { display: block; font-size: 13px; line-height: 1.35; color: #6a6a6a; }
+        .paint-hero-visual { position: relative; min-height: 500px; height: 100%; border-radius: 24px; overflow: hidden; background: #e9e2d7; }
+        .paint-hero-room { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+        .paint-hero-swatches { position: absolute; left: 22px; bottom: 22px; z-index: 2; display: flex; gap: 9px; padding: 10px; border-radius: 999px; background: rgba(255,250,240,.9); box-shadow: 0 8px 24px rgba(0,0,0,.16); backdrop-filter: blur(8px); }
+        .paint-hero-swatch { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #fffaf0; box-shadow: 0 0 0 1px rgba(10,10,10,.08); cursor: pointer; padding: 0; transition: transform .18s; }
+        .paint-hero-swatch:hover { transform: translateY(-2px); }
+        .paint-hero-switcher { max-width: 1280px; margin: 0 auto; padding: 0 24px 24px; display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+        .paint-hero-nav, .paint-hero-dot { border: 1px solid #d8cfbf; background: #fffaf0; color: #0a0a0a; cursor: pointer; transition: background .2s, color .2s, border-color .2s, width .2s; }
+        .paint-hero-nav { width: 42px; height: 42px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+        .paint-hero-nav:hover { background: #0a0a0a; color: #fff; border-color: #0a0a0a; }
+        .paint-hero-dot { width: 12px; height: 12px; border-radius: 999px; padding: 0; }
+        .paint-hero-dot.active { width: 34px; background: var(--hero-accent); border-color: var(--hero-accent); }
+        .doors { background: ${B.warm}; border-bottom: 1px solid #e8e2d8; padding: 28px 0 32px; }
+        .doors-grid { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(240px, .78fr); gap: 16px; align-items: stretch; }
+        .doors-home, .doors-trade, .doors-tin { font-family: 'Outfit', sans-serif; cursor: pointer; text-align: left; border: none; border-radius: 16px; overflow: hidden; }
+        .doors-home:focus-visible, .doors-trade:focus-visible, .doors-tin:focus-visible { outline: 2px solid ${B.coral}; outline-offset: 3px; }
+        .doors-home { position: relative; min-height: 420px; padding: 0; color: #fff; background: #1a1a1a; }
+        .doors-home img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .55s cubic-bezier(.22, 1, .36, 1); }
+        .doors-home:hover img { transform: scale(1.04); }
+        .doors-home-shade { position: absolute; left: 0; right: 0; bottom: 0; height: 48%; background: linear-gradient(transparent, rgba(10,10,10,.68)); pointer-events: none; }
+        .doors-home-copy { position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: flex-end; min-height: 420px; padding: 28px; }
+        .doors-home-copy strong { display: block; font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 8px; }
+        .doors-home-copy span { display: block; font-size: 15px; line-height: 1.55; max-width: 38ch; color: #f4f0ea; }
+        .doors-side { display: flex; flex-direction: column; gap: 16px; min-height: 420px; }
+        .doors-trade { flex: 1.15; display: flex; flex-direction: column; justify-content: space-between; gap: 18px; background: ${B.coral}; color: #fff; padding: 26px; transition: background .2s; }
+        .doors-trade:hover { background: ${B.coralDk}; }
+        .doors-trade strong { display: block; font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 8px; }
+        .doors-trade-copy { display: block; font-size: 15px; line-height: 1.55; margin: 0; color: #fff8f4; }
+        .doors-trade-go { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; }
+        .doors-tin { flex: 1; display: flex; align-items: center; gap: 16px; background: #fff; color: #1a1a1a; padding: 18px 20px; transition: background .2s; }
+        .doors-tin:hover { background: #fffaf0; }
+        .doors-tin img { width: 92px; height: 92px; object-fit: contain; flex-shrink: 0; }
+        .doors-tin strong { display: block; font-size: 18px; font-weight: 700; margin-bottom: 4px; color: #1a1a1a; }
+        .doors-tin span { display: block; font-size: 13px; line-height: 1.45; color: #5a5348; }
         .bd { background: #1a1a1a; color: #fff; } .bd:hover { background: #333; }
         .st { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 600; }
         .mega { position: absolute; top: 100%; left: 0; right: 0; background: #fff; box-shadow: 0 8px 40px rgba(0,0,0,.12); z-index: 100; animation: msd .25s ease; }
@@ -2070,13 +2229,32 @@ export default function PeacockPaintsWebsite() {
         @keyframes sl { from { transform: translateX(100%); } to { transform: translateX(0); } }
         .fc h4 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 16px; color: #fff; }
         .fc span { display: block; font-size: 13px; color: rgba(255,255,255,.7); margin-bottom: 10px; cursor: pointer; } .fc span:hover { color: #fff; }
+        .fc a { display: block; font-size: 13px; color: rgba(255,255,255,.7); margin-bottom: 10px; } .fc a:hover { color: #fff; }
         .so { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 1000; display: flex; align-items: flex-start; justify-content: center; padding-top: 120px; animation: fi .2s; }
         .si { width: 100%; border: 2px solid #e0e0e0; border-radius: 6px; padding: 14px 18px; font-size: 16px; font-family: 'Outfit',sans-serif; outline: none; } .si:focus { border-color: ${B.coral}; }
         .cs::-webkit-scrollbar { display: none; }
         .tab { padding: 10px 24px; border-radius: 24px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all .2s; border: 2px solid transparent; font-family: 'Outfit',sans-serif; }
         .ta { background: ${B.coral}; color: #fff; border-color: ${B.coral}; }
         .ti { background: transparent; color: #555; border-color: #ddd; } .ti:hover { border-color: ${B.coral}; color: ${B.coral}; }
+        @media (max-width: 900px) {
+          .paint-hero-shell { grid-template-columns: 1fr; gap: 28px; padding-top: 48px; min-height: auto; }
+          .paint-hero-title { font-size: 42px; }
+          .paint-hero-copy p { font-size: 16px; }
+          .paint-hero-visual { min-height: 460px; }
+          .paint-hero-switcher { justify-content: center; }
+          .doors-grid { grid-template-columns: 1fr; }
+          .doors-home, .doors-home-copy, .doors-side { min-height: 320px; }
+          .doors-home-copy strong { font-size: 30px; }
+        }
         @media (max-width: 768px) { .dsk { display: none !important; } .g4 { grid-template-columns: 1fr !important; } .g3 { grid-template-columns: 1fr !important; } .g2 { grid-template-columns: 1fr !important; } .g5 { grid-template-columns: 1fr 1fr !important; } .ge4 { grid-template-columns: 1fr 1fr !important; } .hero-s { height: 400px !important; } }
+        @media (max-width: 640px) {
+          .paint-hero-shell { padding: 34px 18px 24px; }
+          .paint-hero-title { font-size: 34px; line-height: 1.08; }
+          .paint-hero-actions { margin-bottom: 26px; }
+          .paint-hero-action { width: 100%; justify-content: center; }
+          .paint-hero-proof { grid-template-columns: 1fr 1fr; }
+          .paint-hero-visual { min-height: 420px; }
+        }
         @media (min-width: 769px) and (max-width: 1024px) { .g4 { grid-template-columns: repeat(2, 1fr) !important; } .g5 { grid-template-columns: repeat(2, 1fr) !important; } }
         @media (min-width: 769px) { .mob { display: none !important; } }
       `}</style>
@@ -2084,7 +2262,7 @@ export default function PeacockPaintsWebsite() {
       {/* Top Bar */}
       <div style={{ background: B.black, color: "#fff", fontSize: 13, padding: "8px 0" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-          <div style={{ display: "flex", gap: 24, alignItems: "center", flexWrap: "wrap" }}><span style={{ display: "flex", alignItems: "center", gap: 6 }}><TruckIcon /> Free delivery over UGX 200,000</span><span style={{ display: "flex", alignItems: "center", gap: 6 }}><PaletteIcon /> 5 colour samples for UGX 15,000</span></div>
+          <div style={{ display: "flex", gap: 24, alignItems: "center", flexWrap: "wrap" }}><span style={{ display: "flex", alignItems: "center", gap: 6 }}><TruckIcon /> Free delivery over UGX 200,000</span><button onClick={addSampleBundle} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", color: "inherit", font: "inherit", cursor: "pointer" }}><PaletteIcon /> 5 colour samples for UGX 15,000</button></div>
           <div className="dsk" style={{ display: "flex", gap: 20, fontSize: 12 }}><span style={{ cursor: "pointer" }}>Stockists</span><span style={{ cursor: "pointer" }}>Contact Us</span><span style={{ cursor: "pointer" }}>Professionals</span></div>
         </div>
       </div>
@@ -2134,7 +2312,7 @@ export default function PeacockPaintsWebsite() {
                       );
                     })}
                   </div>
-                  {col.footer && <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid #e8e8e8" }}>{col.footer.map((f, fi) => (<span key={fi} className="ml" style={{ fontWeight: 600, color: B.coral }}>{f.label}</span>))}</div>}
+                  {col.footer && <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid #e8e8e8" }}>{col.footer.map((f, fi) => (<button key={fi} className="ml" onClick={() => handleMegaFooter(f.label)} style={{ fontWeight: 600, color: B.coral, border: "none", background: "none", fontFamily: "inherit", width: "100%", textAlign: "left" }}>{f.label}</button>))}</div>}
                 </div>) : (<div>
                   <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5, color: B.coral, marginBottom: 14 }}>{col.title}</h3>
                   {col.links.map((l, li) => {
@@ -2151,7 +2329,7 @@ export default function PeacockPaintsWebsite() {
                       else if (linkedProduct) { openProduct(linkedProduct); }
                     }} style={{ ...aReset, cursor: isClickable ? "pointer" : "default", color: isFinishLink ? B.black : undefined }}>{l}</a>);
                   })}
-                  {col.footer && <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid #e8e8e8" }}>{col.footer.map((f, fi) => (<span key={fi} className="ml" style={{ fontWeight: 600, color: B.coral }}>{f.label}</span>))}</div>}
+                  {col.footer && <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid #e8e8e8" }}>{col.footer.map((f, fi) => (<button key={fi} className="ml" onClick={() => handleMegaFooter(f.label)} style={{ fontWeight: 600, color: B.coral, border: "none", background: "none", fontFamily: "inherit", width: "100%", textAlign: "left" }}>{f.label}</button>))}</div>}
                 </div>)}
               </div>))}
             </div>
@@ -2186,7 +2364,7 @@ export default function PeacockPaintsWebsite() {
                 return (
                 <div key={i} style={{ display: "flex", gap: 16, padding: "16px 0", borderBottom: "1px solid #f0f0f0" }}>
                   <div style={{ width: 64, height: 64, background: B.off, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
-                    {item.product.img && <img src={item.product.img} alt="" style={{ maxHeight: 54, maxWidth: 54, objectFit: "contain" }} />}
+                    {item.product.img ? <img src={item.product.img} alt="" style={{ maxHeight: 54, maxWidth: 54, objectFit: "contain" }} /> : <div style={{ width: 48, height: 48, borderRadius: 8, background: colourData?.color || B.coral, border: "2px solid #fff", boxShadow: "0 2px 8px rgba(0,0,0,.12)" }} />}
                     {colourData && <div style={{ position: "absolute", bottom: -4, right: -4, width: 22, height: 22, borderRadius: "50%", background: colourData.color, border: "2px solid #fff", boxShadow: "0 1px 4px rgba(0,0,0,0.15)" }} />}
                   </div>
                   <div style={{ flex: 1 }}>
@@ -2256,19 +2434,19 @@ export default function PeacockPaintsWebsite() {
         <ProductDetailPage product={selectedProduct} onBack={() => nav("home")} onAddToCart={addToCart} onOpenProduct={openProduct} />
       ) : pg === "bedroom-inspiration" ? (
         <><div style={{ maxWidth: 1280, margin: "0 auto", padding: "16px 24px" }}><a href={makeHref("home")} onClick={e => { e.preventDefault(); nav("home"); }} style={{ ...aReset, fontSize: 13, color: B.coral, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}><ArrL /> Home</a></div>
-        <RoomInspirationPage roomName="Bedroom" inspirations={BEDROOM_INSPIRATIONS} onBack={() => nav("home")} nav={nav} /></>
+        <RoomInspirationPage roomName="Bedroom" inspirations={BEDROOM_INSPIRATIONS} onBack={() => nav("home")} nav={nav} onAddSample={addSamplePot} onAddSampleBundle={addSampleBundle} /></>
       ) : pg === "livingroom-inspiration" ? (
         <><div style={{ maxWidth: 1280, margin: "0 auto", padding: "16px 24px" }}><a href={makeHref("home")} onClick={e => { e.preventDefault(); nav("home"); }} style={{ ...aReset, fontSize: 13, color: B.coral, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}><ArrL /> Home</a></div>
-        <RoomInspirationPage roomName="Living Room" inspirations={LIVING_ROOM_INSPIRATIONS} onBack={() => nav("home")} nav={nav} /></>
+        <RoomInspirationPage roomName="Living Room" inspirations={LIVING_ROOM_INSPIRATIONS} onBack={() => nav("home")} nav={nav} onAddSample={addSamplePot} onAddSampleBundle={addSampleBundle} /></>
       ) : pg === "diningroom-inspiration" ? (
         <><div style={{ maxWidth: 1280, margin: "0 auto", padding: "16px 24px" }}><a href={makeHref("home")} onClick={e => { e.preventDefault(); nav("home"); }} style={{ ...aReset, fontSize: 13, color: B.coral, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}><ArrL /> Home</a></div>
-        <RoomInspirationPage roomName="Dining Room" inspirations={DINING_ROOM_INSPIRATIONS} onBack={() => nav("home")} nav={nav} /></>
+        <RoomInspirationPage roomName="Dining Room" inspirations={DINING_ROOM_INSPIRATIONS} onBack={() => nav("home")} nav={nav} onAddSample={addSamplePot} onAddSampleBundle={addSampleBundle} /></>
       ) : pg === "kitchen-inspiration" ? (
         <><div style={{ maxWidth: 1280, margin: "0 auto", padding: "16px 24px" }}><a href={makeHref("home")} onClick={e => { e.preventDefault(); nav("home"); }} style={{ ...aReset, fontSize: 13, color: B.coral, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}><ArrL /> Home</a></div>
-        <RoomInspirationPage roomName="Kitchen" inspirations={KITCHEN_INSPIRATIONS} onBack={() => nav("home")} nav={nav} /></>
+        <RoomInspirationPage roomName="Kitchen" inspirations={KITCHEN_INSPIRATIONS} onBack={() => nav("home")} nav={nav} onAddSample={addSamplePot} onAddSampleBundle={addSampleBundle} /></>
       ) : pg === "bathroom-inspiration" ? (
         <><div style={{ maxWidth: 1280, margin: "0 auto", padding: "16px 24px" }}><a href={makeHref("home")} onClick={e => { e.preventDefault(); nav("home"); }} style={{ ...aReset, fontSize: 13, color: B.coral, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}><ArrL /> Home</a></div>
-        <RoomInspirationPage roomName="Bathroom" inspirations={BATHROOM_INSPIRATIONS} onBack={() => nav("home")} nav={nav} /></>
+        <RoomInspirationPage roomName="Bathroom" inspirations={BATHROOM_INSPIRATIONS} onBack={() => nav("home")} nav={nav} onAddSample={addSamplePot} onAddSampleBundle={addSampleBundle} /></>
       ) : pg === "colour-detail" && selectedColour ? (
         <ColourDetailPage
           colour={selectedColour}
@@ -2282,8 +2460,24 @@ export default function PeacockPaintsWebsite() {
           }}
           onBackHome={() => nav("home")}
           onAddToCart={addToCart}
+          onAddSample={addSamplePot}
           homeHref={makeHref("home")}
           backHref={(() => { const d = COLOUR_CATEGORIES[selectedColourCategory]; if (d) return makeHref(d.slug); const s = STYLE_CATEGORIES[selectedColourStyle]; if (s) return makeHref(s.slug); return makeHref("home"); })()}
+        />
+      ) : pg === "all-colours" ? (
+        <ColourCategoryPage
+          categoryName="colours"
+          categoryData={{ slug: "all-colours", desc: "Every Peacock shade in one place.", colors: trendingColours.map(c => c.name), gradient: "linear-gradient(135deg, #fffaf0, #f3e7d3)", accent: B.coral }}
+          allColours={trendingColours}
+          onBack={() => nav("home")}
+          onNavCategory={(name) => { const d = COLOUR_CATEGORIES[name]; if (d) nav(d.slug); }}
+          onOpenColour={handleColourClick}
+          onAddSample={addSamplePot}
+          onAddSampleBundle={addSampleBundle}
+          onViewAllColours={() => nav("all-colours")}
+          homeHref={makeHref("home")}
+          colourHrefFn={colourHref}
+          catHrefFn={(name, data) => makeHref(data.slug)}
         />
       ) : currentColourCatName ? (
         <ColourCategoryPage
@@ -2293,6 +2487,9 @@ export default function PeacockPaintsWebsite() {
           onBack={() => nav("home")}
           onNavCategory={(name) => { const d = COLOUR_CATEGORIES[name]; if (d) nav(d.slug); }}
           onOpenColour={(c) => { setSelectedColour(c); setSelectedColourCategory(currentColourCatName); nav("colour-detail"); }}
+          onAddSample={addSamplePot}
+          onAddSampleBundle={addSampleBundle}
+          onViewAllColours={() => nav("all-colours")}
           homeHref={makeHref("home")}
           colourHrefFn={colourHref}
           catHrefFn={(name, data) => makeHref(data.slug)}
@@ -2305,6 +2502,9 @@ export default function PeacockPaintsWebsite() {
           onBack={() => nav("home")}
           onNavStyle={(name) => { const d = STYLE_CATEGORIES[name]; if (d) nav(d.slug); }}
           onOpenColour={(c) => { setSelectedColour(c); setSelectedColourStyle(currentStyleName); setSelectedColourCategory(null); nav("colour-detail"); }}
+          onAddSample={addSamplePot}
+          onAddSampleBundle={addSampleBundle}
+          onViewAllColours={() => nav("all-colours")}
           homeHref={makeHref("home")}
           colourHrefFn={colourHref}
           styleHrefFn={(name, data) => makeHref(data.slug)}
@@ -2313,23 +2513,75 @@ export default function PeacockPaintsWebsite() {
         <><div style={{ maxWidth: 1280, margin: "0 auto", padding: "16px 24px" }}><a href={makeHref("home")} onClick={e => { e.preventDefault(); nav("home"); }} style={{ ...aReset, fontSize: 13, color: B.coral, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 500 }}><ArrL /> Home</a></div>{renderStory(pg)}</>
       ) : (<>
         {/* Hero */}
-        <section className="hero-s" style={{ position: "relative", height: 520, overflow: "hidden" }}>
-          {heroSlides.map((sl, i) => (<div key={i} style={{ position: "absolute", inset: 0, background: sl.bg, opacity: heroSlide === i ? 1 : 0, transition: "opacity .8s ease", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <div style={{ textAlign: "center", color: "#fff", padding: "0 24px", maxWidth: 700 }}>
-              {i === 0 && <div style={{ marginBottom: 20 }}><img src={LOGO_HERO} alt="" style={{ height: 120, filter: "invert(1)", mixBlendMode: "screen", opacity: .95 }} /></div>}
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: i === 0 ? 28 : 40, fontWeight: 500, lineHeight: 1.4, marginBottom: 32 }}>{sl.tagline}</h1>
-              <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}><button className="btn bo">{sl.cta1}</button><button className="btn bo">{sl.cta2}</button></div>
+        <section
+          className="paint-hero"
+          onMouseEnter={() => setHeroPaused(true)}
+          onMouseLeave={() => setHeroPaused(false)}
+          onFocus={() => setHeroPaused(true)}
+          onBlur={() => setHeroPaused(false)}
+          style={{ "--hero-accent": currentHero.accent }}
+        >
+          <div className="paint-hero-shell">
+            <div className="paint-hero-copy">
+              <div className="paint-hero-kicker"><span />{currentHero.eyebrow}</div>
+              <h1 className="paint-hero-title">{currentHero.title}</h1>
+              <p>{currentHero.copy}</p>
+              <div className="paint-hero-actions">
+                <button className="paint-hero-action" onClick={shopHeroProducts}>Shop paints <Arr /></button>
+                <button className="paint-hero-action secondary" onClick={exploreHero}>{currentHero.cta2} <Arr /></button>
+              </div>
+              <div className="paint-hero-proof" aria-label="Peacock Paints highlights">
+                <div><strong>1962</strong><span>The Painters' Paint</span></div>
+                <div><strong>{trendingColours.length}</strong><span>colour shades</span></div>
+                <div><strong>5</strong><span>sample pots bundle</span></div>
+              </div>
             </div>
-          </div>))}
-          <div style={{ position: "absolute", bottom: 24, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 10 }}>
-            {heroSlides.map((_, i) => (<button key={i} onClick={() => setHeroSlide(i)} style={{ width: heroSlide === i ? 32 : 10, height: 10, borderRadius: 5, background: heroSlide === i ? "#fff" : "rgba(255,255,255,.5)", border: "none", cursor: "pointer", transition: "all .3s" }} />))}
+
+            <div className="paint-hero-visual" aria-label={`${currentHero.note} room inspiration`}>
+              <img className="paint-hero-room" src={currentHero.roomImg} alt={`${currentHero.note} painted with Peacock colours`} />
+              <div className="paint-hero-swatches">
+                {currentHero.swatches.map(s => (
+                  <button key={s.name} className="paint-hero-swatch" title={s.name} aria-label={`View ${s.name} colour`} onClick={() => openHeroSwatch(s)} style={{ background: s.color }} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="paint-hero-switcher">
+            <button className="paint-hero-nav" onClick={() => showHeroSlide(heroSlide - 1)} aria-label="Previous hero slide"><ArrL /></button>
+            {heroSlides.map((sl, i) => (
+              <button key={sl.eyebrow} className={`paint-hero-dot ${heroSlide === i ? "active" : ""}`} onClick={() => showHeroSlide(i)} aria-label={`Show ${sl.eyebrow}`} />
+            ))}
+            <button className="paint-hero-nav" onClick={() => showHeroSlide(heroSlide + 1)} aria-label="Next hero slide"><Arr /></button>
           </div>
         </section>
 
-        {/* Quick Links */}
-        <section style={{ background: B.warm, borderBottom: "1px solid #e8e2d8" }}>
-          <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
-            {["Paints","Tools","Samples"].map((l, i) => (<div key={i} style={{ padding: "18px 40px", fontSize: 15, fontWeight: 600, cursor: "pointer", borderRight: i < 2 ? "1px solid #e0dad0" : "none", transition: "background .2s" }} onMouseEnter={e => e.currentTarget.style.background = "#e6e0d6"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>{l}</div>))}
+        <section className="doors" aria-label="Shop for the home or for site teams">
+          <div className="doors-grid">
+            <button className="doors-home" onClick={() => nav("bedroom-inspiration")}>
+              <img src={INSPO_SCANDI_SAGE} alt="Sage bedroom with a wood bed, linen, and morning light" />
+              <span className="doors-home-shade" aria-hidden="true" />
+              <span className="doors-home-copy">
+                <strong>For the home.</strong>
+                <span>Find interior paints and colours that work with the light in every room.</span>
+              </span>
+            </button>
+            <div className="doors-side">
+              <button className="doors-trade" onClick={() => nav("exterior-paint")}>
+                <span>
+                  <strong>For site teams.</strong>
+                  <span className="doors-trade-copy">Specify exterior, industrial, and trade finishes built for the job.</span>
+                </span>
+                <span className="doors-trade-go">Exterior paints <Arr /></span>
+              </button>
+              <button className="doors-tin" onClick={() => openProduct(weathershield)}>
+                <img src={IMG_WEATHER} alt="" />
+                <span>
+                  <strong>Weathershield</strong>
+                  <span>Grade 1 exterior matt. From {fmtP(weathershield.sizes[0].price)}</span>
+                </span>
+              </button>
+            </div>
           </div>
         </section>
 
@@ -2340,7 +2592,7 @@ export default function PeacockPaintsWebsite() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
               <h2 className="st">Our trending colours</h2>
               <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <button className="btn bd dsk">Shop all colours</button>
+                <button className="btn bd dsk" onClick={() => nav("all-colours")}>Shop all colours</button>
                 {/* Prev arrow */}
                 <button
                   onClick={() => setColourCarouselIdx(i => Math.max(0, i - 1))}
@@ -2377,7 +2629,7 @@ export default function PeacockPaintsWebsite() {
                     <p style={{ fontSize: 11, color: "rgba(255,255,255,.75)", marginBottom: 12, lineHeight: 1.4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.desc}</p>
                     <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
                       <button onClick={e => { e.stopPropagation(); e.preventDefault(); handleColourClick(c); }} style={{ flex: 1, padding: "7px 0", background: "#1a1a1a", color: "#fff", border: "none", borderRadius: 4, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Outfit',sans-serif", letterSpacing: .3 }}>Shop</button>
-                      <button onClick={e => { e.stopPropagation(); e.preventDefault(); }} style={{ flex: 1, padding: "7px 0", background: "transparent", color: "#fff", border: "1.5px solid rgba(255,255,255,.65)", borderRadius: 4, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>+ Sample</button>
+                      <button onClick={e => { e.stopPropagation(); e.preventDefault(); addSamplePot(c.name); }} style={{ flex: 1, padding: "7px 0", background: "transparent", color: "#fff", border: "1.5px solid rgba(255,255,255,.65)", borderRadius: 4, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>+ Sample</button>
                       <button onClick={e => { e.stopPropagation(); e.preventDefault(); handleColourClick(c); }} style={{ width: 30, height: 30, background: "rgba(255,255,255,.2)", border: "none", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", flexShrink: 0 }}><Arr /></button>
                     </div>
                   </div>
@@ -2466,7 +2718,7 @@ export default function PeacockPaintsWebsite() {
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
           <div className="g5" style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1fr 1.5fr", gap: 40, paddingBottom: 40 }}>
             <div><div style={{ marginBottom: 20 }}><img src={LOGO_FOOTER} alt="" style={{ height: 50, filter: "invert(1)", mixBlendMode: "screen", opacity: .9 }} /></div><p style={{ fontSize: 13, color: "rgba(255,255,255,.5)", lineHeight: 1.6 }}>The Painters' Paint. Premium paints for every room, surface, and style.</p></div>
-            <div className="fc"><h4>Shop</h4><span>Colours</span><span>Paint</span><span>Accessories</span><span>Inspiration</span></div>
+            <div className="fc"><h4>Shop</h4><span onClick={() => nav("all-colours")}>Colours</span><span>Paint</span><span onClick={() => nav("bedroom-inspiration")}>Inspiration</span></div>
             <div className="fc"><h4>Company</h4><a href={makeHref("about")} onClick={e => { e.preventDefault(); nav("about"); }} style={aReset}>About Us</a><a href={makeHref("sustainability")} onClick={e => { e.preventDefault(); nav("sustainability"); }} style={aReset}>Sustainability</a><a href={makeHref("community")} onClick={e => { e.preventDefault(); nav("community"); }} style={aReset}>Community</a><a href={makeHref("foundation")} onClick={e => { e.preventDefault(); nav("foundation"); }} style={aReset}>Foundation</a></div>
             <div className="fc"><h4>Support</h4><span>Help & FAQs</span><span>Find Stockist</span><span>Delivery</span><span>Returns</span></div>
             <div className="fc"><h4>Contact</h4><p style={{ fontSize: 13, color: "rgba(255,255,255,.6)", lineHeight: 1.6, marginBottom: 16 }}>Questions? We're here to help.</p><p style={{ fontSize: 13, color: "rgba(255,255,255,.5)", marginBottom: 12 }}>Mon–Fri: 8:00–17:00</p><div style={{ display: "flex", gap: 16 }}><span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "rgba(255,255,255,.7)", cursor: "pointer" }}><PhoneIcon /> Call</span><span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "rgba(255,255,255,.7)", cursor: "pointer" }}><MailIcon /> Email</span></div></div>
